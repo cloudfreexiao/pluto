@@ -234,7 +234,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     message(STATUS "current platform: Windows")
     add_compile_definitions(NOUSE_JEMALLOC LUA_BUILD_AS_DLL)
 
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-int-conversion -Wno-implicit-function-declaration -Wno-deprecated-declarations -Winconsistent-dllimport")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-int-conversion -Wno-implicit-function-declaration -Wno-deprecated-declarations")
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
     #设置输出目录
@@ -261,6 +261,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     add_subdirectory(3rd/pthread-win32)
     add_library(liblua SHARED ${LUA_LIB_SRC})
     add_library(libposix SHARED ${POSIX_SRC})
+    target_compile_definitions(libposix PRIVATE POSIX_LIBRARY)
     target_link_libraries(libposix ws2_32)
     add_library(libskynet SHARED ${LIB_SKYNET_SRC})
     target_link_libraries(libskynet liblua libposix pthreadVC3)
