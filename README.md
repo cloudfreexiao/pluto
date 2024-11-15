@@ -2,9 +2,10 @@
    [skynet](https://github.com/cloudwu/skynet) 以CMake方式组织工程的跨平台的实现.
 
 ## 特点
-    1. 跨平台
-    2. 支持在 vs2022 中编译运行
+    1. 跨平台 windows linux macosx
+    2. 支持在 vs2022 xcode vscode 的IDE编译运行
     3. skynet 以 submodule 的方式链接,方便升级,确保不改
+    4. 包含一些常用的lua库
 
 ## 在 Windows 下
 
