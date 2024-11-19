@@ -3,10 +3,10 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #define WIN32_LEAN_AND_MEAN
 #include <WinSock2.h>
-#include <Windows.h>
-#include <conio.h>
-#include <stdint.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <windows.h>
+#include <conio.h>
 
 static LONGLONG get_cpu_freq() {
     LARGE_INTEGER freq;
@@ -37,59 +37,56 @@ void usleep(size_t us) {
 
 void sleep(size_t ms) { Sleep(ms); }
 
-// 将 FILETIME 转换为秒和纳秒
-void filetime_to_timespec(const FILETIME* ft, struct timespec* ts) {
-    ULARGE_INTEGER uli;
-    uli.LowPart = ft->dwLowDateTime;
-    uli.HighPart = ft->dwHighDateTime;
-
-    // FILETIME 是自1601年1月1日以来的100纳秒间隔
-    uint64_t total_nsec = uli.QuadPart * 100; // 转换为纳秒
-    ts->tv_sec = (long)(total_nsec / 1000000000); // 转换为秒
-    ts->tv_nsec = (long)(total_nsec % 1000000000); // 剩余的纳秒
-}
-
-// 获取系统时钟
-int clock_gettime(int clk_id, struct timespec* ts) {
-    if (!ts) return -1;
-
-    if (clk_id == CLOCK_REALTIME) {
-        // 获取当前时间（UTC 时间）
-        FILETIME ft;
-        GetSystemTimeAsFileTime(&ft);
-        filetime_to_timespec(&ft, ts);
-        return 0;
-    } else if (clk_id == CLOCK_MONOTONIC) {
-        // 获取单调时钟（高精度性能计数器）
-        static LARGE_INTEGER frequency;
-        static int initialized = 0;
-        LARGE_INTEGER counter;
-
-        if (!initialized) {
-            QueryPerformanceFrequency(&frequency);
-            initialized = 1;
+int clock_gettime(int what, struct timespec* ti) {
+    switch (what) {
+    case CLOCK_MONOTONIC:
+        static __int64 Freq = 0;
+        static __int64 Start = 0;
+        static __int64 StartTime = 0;
+        if (Freq == 0) {
+            StartTime = time(NULL);
+            QueryPerformanceFrequency((LARGE_INTEGER*)&Freq);
+            QueryPerformanceCounter((LARGE_INTEGER*)&Start);
         }
-        QueryPerformanceCounter(&counter);
+        __int64 Count = 0;
+        QueryPerformanceCounter((LARGE_INTEGER*)&Count);
 
-        ts->tv_sec = (long)(counter.QuadPart / frequency.QuadPart);
-        ts->tv_nsec = (long)((counter.QuadPart % frequency.QuadPart) * 1000000000 / frequency.QuadPart);
+        //乘以1000，把秒化为毫秒
+        __int64 now = (__int64)((double)(Count - Start) / (double)Freq * 1000.0) + StartTime * 1000;
+        ti->tv_sec = now / 1000;
+        ti->tv_nsec = (now - now / 1000 * 1000) * 1000 * 1000;
         return 0;
-    } else if (clk_id == CLOCK_THREAD_CPUTIME_ID) {
+    case CLOCK_REALTIME:
+        SYSTEMTIME st;
+        GetSystemTime(&st); // 获取 UTC 时间
+
+        // 将 SYSTEMTIME 转换为 UNIX 时间戳
+        FILETIME ft;
+        SystemTimeToFileTime(&st, &ft);
+        ULARGE_INTEGER u64;
+        u64.LowPart = ft.dwLowDateTime;
+        u64.HighPart = ft.dwHighDateTime;
+
+        ti->tv_sec = (uint32_t)((u64.QuadPart - 116444736000000000ULL) / 10000000); // 转换为秒
+        ti->tv_nsec = (uint32_t)((u64.QuadPart % 10000000) * 100); // 获取纳秒部分
+        return 0; // 响应成功
+    case CLOCK_THREAD_CPUTIME_ID:
         // 获取当前线程的 CPU 时间
         FILETIME creation_time, exit_time, kernel_time, user_time;
         if (GetThreadTimes(GetCurrentThread(), &creation_time, &exit_time, &kernel_time, &user_time)) {
-            struct timespec user_ts;
-            filetime_to_timespec(&user_time, &user_ts);
-            ts->tv_sec = user_ts.tv_sec;
-            ts->tv_nsec = user_ts.tv_nsec;
+            ULARGE_INTEGER u64;
+            u64.LowPart = user_time.dwLowDateTime;
+            u64.HighPart = user_time.dwHighDateTime;
+
+            ti->tv_sec = (uint32_t)((u64.QuadPart - 116444736000000000ULL) / 10000000); // 转换为秒
+            ti->tv_nsec = (uint32_t)((u64.QuadPart % 10000000) * 100); // 获取纳秒部分
             return 0;
-        } else {
+        }
+        else {
             return -1; // 获取失败
         }
-    } else {
-        // 不支持的时钟 ID
-        return -1;
     }
+    return -1;
 }
 
 int flock(int fd, int flag) {
