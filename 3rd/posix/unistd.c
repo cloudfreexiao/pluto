@@ -5,6 +5,8 @@
 #include <WinSock2.h>
 #include <Windows.h>
 #include <conio.h>
+#include <stdint.h>
+#include <stdio.h>
 
 static LONGLONG get_cpu_freq() {
     LARGE_INTEGER freq;
