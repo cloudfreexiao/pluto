@@ -1,14 +1,8 @@
-/*
-** LuaSystemLog
-** Copyright 1994-2021 Nicolas Casalini (DarkGod)
-**
-*/
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
 
 #include <syslog.h>
-
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
 
 static int lsyslog_open(lua_State *L)
 {
