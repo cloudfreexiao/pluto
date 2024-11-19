@@ -35,26 +35,59 @@ void usleep(size_t us) {
 
 void sleep(size_t ms) { Sleep(ms); }
 
-int clock_gettime(int what, struct timespec* ti) {
+// 将 FILETIME 转换为秒和纳秒
+void filetime_to_timespec(const FILETIME* ft, struct timespec* ts) {
+    ULARGE_INTEGER uli;
+    uli.LowPart = ft->dwLowDateTime;
+    uli.HighPart = ft->dwHighDateTime;
 
-    switch (what) {
-    case CLOCK_MONOTONIC:
-    case CLOCK_REALTIME:
-    case CLOCK_THREAD_CPUTIME_ID: {
-        LONGLONG freq = get_cpu_freq();
+    // FILETIME 是自1601年1月1日以来的100纳秒间隔
+    uint64_t total_nsec = uli.QuadPart * 100; // 转换为纳秒
+    ts->tv_sec = (long)(total_nsec / 1000000000); // 转换为秒
+    ts->tv_nsec = (long)(total_nsec % 1000000000); // 剩余的纳秒
+}
+
+// 获取系统时钟
+int clock_gettime(int clk_id, struct timespec* ts) {
+    if (!ts) return -1;
+
+    if (clk_id == CLOCK_REALTIME) {
+        // 获取当前时间（UTC 时间）
+        FILETIME ft;
+        GetSystemTimeAsFileTime(&ft);
+        filetime_to_timespec(&ft, ts);
+        return 0;
+    } else if (clk_id == CLOCK_MONOTONIC) {
+        // 获取单调时钟（高精度性能计数器）
+        static LARGE_INTEGER frequency;
+        static int initialized = 0;
         LARGE_INTEGER counter;
+
+        if (!initialized) {
+            QueryPerformanceFrequency(&frequency);
+            initialized = 1;
+        }
         QueryPerformanceCounter(&counter);
 
-        ti->tv_sec = counter.QuadPart / freq;
-        ti->tv_nsec =
-            (LONGLONG)(counter.QuadPart / ((double)freq / NANOSEC)) % NANOSEC;
-        // ti->tv_nsec *= 1000;
+        ts->tv_sec = (long)(counter.QuadPart / frequency.QuadPart);
+        ts->tv_nsec = (long)((counter.QuadPart % frequency.QuadPart) * 1000000000 / frequency.QuadPart);
         return 0;
-    default:
-        return 3;
-    } break;
+    } else if (clk_id == CLOCK_THREAD_CPUTIME_ID) {
+        // 获取当前线程的 CPU 时间
+        FILETIME creation_time, exit_time, kernel_time, user_time;
+        if (GetThreadTimes(GetCurrentThread(), &creation_time, &exit_time, &kernel_time, &user_time)) {
+            struct timespec user_ts;
+            filetime_to_timespec(&user_time, &user_ts);
+            ts->tv_sec = user_ts.tv_sec;
+            ts->tv_nsec = user_ts.tv_nsec;
+            return 0;
+        } else {
+            return -1; // 获取失败
+        }
+    } else {
+        // 不支持的时钟 ID
+        return -1;
     }
-    return -1;
 }
 
 int flock(int fd, int flag) {

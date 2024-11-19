@@ -28,8 +28,10 @@ POSIX_API int kill(pid_t pid, int exit_code);
 POSIX_API void usleep(size_t us);
 POSIX_API void sleep(size_t ms);
 
-enum { CLOCK_THREAD_CPUTIME_ID, CLOCK_REALTIME, CLOCK_MONOTONIC };
-POSIX_API int clock_gettime(int what, struct timespec *ti);
+#define CLOCK_REALTIME 0
+#define CLOCK_MONOTONIC 1
+#define CLOCK_THREAD_CPUTIME_ID 2
+POSIX_API int clock_gettime(int clk_id, struct timespec *ts);
 
 enum { LOCK_EX, LOCK_NB };
 POSIX_API int flock(int fd, int flag);
