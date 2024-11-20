@@ -20,3 +20,7 @@ https://github.com/chaitin/SafeLine
 https://github.com/amir20/dozzle
 https://github.com/PY44N/LuaObfuscatorV2
 https://github.com/variar/klogg
+https://github.com/meilisearch/meilisearch
+https://github.com/mozillazg/ptcpdump
+https://github.com/grafana/loki
+https://github.com/daytonaio/daytona
