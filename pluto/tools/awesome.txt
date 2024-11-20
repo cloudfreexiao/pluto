@@ -24,3 +24,6 @@ https://github.com/meilisearch/meilisearch
 https://github.com/mozillazg/ptcpdump
 https://github.com/grafana/loki
 https://github.com/daytonaio/daytona
+https://github.com/apache/opendal
+https://github.com/rejetto/hfs
+https://github.com/ccfos/nightingale

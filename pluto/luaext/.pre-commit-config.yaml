@@ -1,0 +1,7 @@
+repos:
+  # 1.访问 pre-commit 官方 https://pre-commit.com/ 按照步骤安装 此工具 
+  # 2.进入对应仓库 执行命令 执行 pre-commit install 初始化环境
+  - repo: https://github.com/Calinou/pre-commit-luacheck
+    rev: v1.0.0
+    hooks:
+      - id: luacheck
