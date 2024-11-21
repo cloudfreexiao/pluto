@@ -1,11 +1,11 @@
 # Workflow's name
-name: linux-clang
+name: ubuntu
 
 # Run this workflow every time a new commit pushed to your repository
 on: [push, pull_request]
 
 jobs:
-  linux-clang:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
