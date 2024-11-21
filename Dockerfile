@@ -3,9 +3,9 @@ FROM ubuntu:24.04
 LABEL maintainer="https://github.com/cloudfreexiao"
 
 RUN apt update
-RUN apt install -y make build-essential cmake gcc g++ valgrind git zip unzip wget sudo rlwrap
-RUN apt install -y zlib1g-dev libbz2-dev libreadline-dev curl llvm libfaketime libcapstone-dev libelf-dev
-RUN apt update
+RUN apt install -y make build-essential cmake gcc g++ git sudo
+RUN apt install -y zlib1g-dev libbz2-dev libreadline-dev llvm libfaketime libcapstone-dev libelf-dev
+RUN apt install -y rlwrap golang-go curl wget valgrind zip unzip
 RUN apt upgrade -y
 RUN apt autoremove
 RUN apt-get clean
@@ -22,6 +22,7 @@ COPY . ${BuildDir}
 WORKDIR ${BuildDir}
 RUN sh build.sh
 RUN cp -rf build/pluto ${RuntimeDir}
+RUN cp -rf pluto/tools ${RuntimeDir}
 RUN rm -rf ${BuildDir}
 
 WORKDIR ${RuntimeDir}/pluto
