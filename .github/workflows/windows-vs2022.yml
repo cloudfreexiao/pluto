@@ -1,0 +1,20 @@
+
+# Workflow's name
+name: windows-vs2022
+
+# Run this workflow every time a new commit pushed to your repository
+on: [push, pull_request]
+
+jobs:
+  windows-vs2022:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: setup msbuild
+        uses: microsoft/setup-msbuild@v1.1
+      - name: Build
+        run: |
+          ./build.bat

@@ -1,0 +1,18 @@
+# Workflow's name
+name: linux-gcc
+
+# Run this workflow every time a new commit pushed to your repository
+on: [push, pull_request]
+
+jobs:
+  linux-gcc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Build
+        run: |
+          sh build.sh
+
