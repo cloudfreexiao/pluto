@@ -55,6 +55,7 @@ services:
     build:
       context: .
       dockerfile: './Dockerfile'
+    container_name: "pluto"
     depends_on:
       - redis
       - mongo

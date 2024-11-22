@@ -27,8 +27,8 @@ WORKDIR ${RuntimeDir}/pluto
 CMD ["sh", "-c", "skynet example/config"]
 
 #打包镜像
-# docker build . -t pluto
-# docker run -it --rm pluto
-# docker exec -it pluto bash
+# docker build . -t plu
 # 删除所有 容器和镜像 
 # docker system prune --all --force
+# docker-compose up -dV
+# docker exec -it pluto bash
