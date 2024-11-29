@@ -17,4 +17,4 @@ jobs:
           sh build.sh
       - name: Output
         run: |
-          find build/pluto -type f
+          cd build/pluto && ls luaclib && ls cservice && ls
