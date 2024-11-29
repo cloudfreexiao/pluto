@@ -15,3 +15,6 @@ jobs:
       - name: Build
         run: |
           sh build.sh
+      - name: Output
+        run: |
+          ls build/pluto

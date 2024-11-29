@@ -21,3 +21,6 @@ jobs:
 
     - name: Build
       run: cmake --build build --config Debug
+    - name: Output
+      run: |
+        ls build/pluto
