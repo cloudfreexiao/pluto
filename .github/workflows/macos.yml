@@ -19,6 +19,3 @@ jobs:
       - name: Output
         run: |
           find build/pluto -type f
-      - name: Run
-        run: |
-          cd build/pluto && ./skynet examples/config
