@@ -18,4 +18,7 @@ jobs:
           sh build.sh
       - name: Output
         run: |
-          ls build/pluto
+          find build/pluto -type f
+      - name: Run
+        run: |
+          cd build/pluto && ./skynet examples/config

@@ -18,9 +18,11 @@ jobs:
     - name: Configure CMake
       run: |
         cmake -B build -G "Visual Studio 17 2022" -A x64 -T ClangCL
-
     - name: Build
       run: cmake --build build --config Debug
     - name: Output
       run: |
-        ls build/pluto
+        dir /s /b build/pluto
+    - name: Run
+      run: |
+        cd build/pluto && ./skynet.exe examples/config
