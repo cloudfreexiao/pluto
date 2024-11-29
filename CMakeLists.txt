@@ -39,7 +39,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     # 编译 lua 可执行文件
     add_executable(lua ${LUA_LIB_SRC} "skynet/3rd/lua/lua.c")
     target_include_directories(lua PRIVATE skynet/skynet-src)
-    target_link_libraries(lua readline)
+    target_link_libraries(lua m readline)
 
     # 编译 skynet 可执行文件
     aux_source_directory(skynet/skynet-src SKYNET_SRC)
@@ -263,6 +263,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     # 编译 lua 可执行文件
     add_executable(lua ${LUA_LIB_SRC} "skynet/3rd/lua/lua.c")
     target_include_directories(lua PRIVATE skynet/skynet-src)
+    target_link_libraries(lua ws2_32)
 
     aux_source_directory(skynet/skynet-src LIB_SKYNET_SRC)
     list(REMOVE_ITEM LIB_SKYNET_SRC skynet/skynet-src/skynet_main.c)
