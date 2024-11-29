@@ -28,7 +28,7 @@ git clone --recurse-submodules git@github.com:cloudfreexiao/pluto.git
     1. 执行 build.sh 编译
     2. 使用 vscode 打开此工程目录(确保安装c++插件)
 
-## 在 MacosX 下
+## 在 Mac OS X 下
     1. 执行 build.sh 编译
     2. 执行 xcode.sh 生成工程文件,编译
     3. 使用 vscode 打开此工程目录(确保安装c++插件)

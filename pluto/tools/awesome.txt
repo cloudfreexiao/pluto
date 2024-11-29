@@ -27,3 +27,6 @@ https://github.com/daytonaio/daytona
 https://github.com/apache/opendal
 https://github.com/rejetto/hfs
 https://github.com/ccfos/nightingale
+https://github.com/dagger/dagger
+https://github.com/fluentci-io/fluentci
+https://github.com/bufbuild/buf
