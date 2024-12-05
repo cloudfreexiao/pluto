@@ -30,3 +30,5 @@ https://github.com/ccfos/nightingale
 https://github.com/dagger/dagger
 https://github.com/fluentci-io/fluentci
 https://github.com/bufbuild/buf
+https://github.com/xjdrew/lua-gdb
+https://github.com/hanxi/blog/issues/84

@@ -20,7 +20,6 @@ COPY . ${BuildDir}
 WORKDIR ${BuildDir}
 RUN sh build.sh
 RUN cp -rf build/pluto ${RuntimeDir}
-RUN cp -rf pluto/tools ${RuntimeDir}
 RUN rm -rf ${BuildDir}
 
 WORKDIR ${RuntimeDir}/pluto
