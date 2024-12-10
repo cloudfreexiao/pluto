@@ -41,6 +41,11 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     target_include_directories(lua PRIVATE skynet/skynet-src)
     target_link_libraries(lua m readline)
 
+    # 编译 luac 可执行文件
+    add_executable(luac ${LUA_LIB_SRC} "skynet/3rd/lua/luac.c")
+    target_include_directories(luac PRIVATE skynet/skynet-src)
+    target_link_libraries(luac m readline)
+
     # 编译 skynet 可执行文件
     aux_source_directory(skynet/skynet-src SKYNET_SRC)
     message(STATUS "The value of SKYNET_SRC is: ${SKYNET_SRC}")
@@ -264,6 +269,11 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     add_executable(lua ${LUA_LIB_SRC} "skynet/3rd/lua/lua.c")
     target_include_directories(lua PRIVATE skynet/skynet-src)
     target_link_libraries(lua ws2_32)
+
+    # 编译 luac 可执行文件
+    add_executable(luac ${LUA_LIB_SRC} "skynet/3rd/lua/luac.c")
+    target_include_directories(luac PRIVATE skynet/skynet-src)
+    target_link_libraries(luac ws2_32)
 
     aux_source_directory(skynet/skynet-src LIB_SKYNET_SRC)
     list(REMOVE_ITEM LIB_SKYNET_SRC skynet/skynet-src/skynet_main.c)
@@ -504,7 +514,12 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     # 编译 lua 可执行文件
     add_executable(lua ${LUA_LIB_SRC} "skynet/3rd/lua/lua.c")
     target_include_directories(lua PRIVATE skynet/skynet-src)
-    target_link_libraries(lua readline)
+    target_link_libraries(lua m readline)
+
+    # 编译 luac 可执行文件
+    add_executable(luac ${LUA_LIB_SRC} "skynet/3rd/lua/luac.c")
+    target_include_directories(luac PRIVATE skynet/skynet-src)
+    target_link_libraries(luac m readline)
 
     # 编译 skynet 可执行文件
     aux_source_directory(skynet/skynet-src SKYNET_SRC)
