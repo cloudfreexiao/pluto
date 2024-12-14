@@ -1,8 +1,3 @@
-require("luaoop.class")
-require("luaoop.enum")
-require("luaoop.mixin")
-require("luaoop.property")
-require("logging.init")
-
-
-
+_ENV.class = require("oop.middleclass")
+_ENV.singleton = require("oop.singleton")
+_ENV.logger = require("logging.init")

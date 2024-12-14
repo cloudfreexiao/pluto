@@ -1,4 +1,6 @@
 
-_ENV.logger = {}
+local logger = {}
+
+return logger
 
 
