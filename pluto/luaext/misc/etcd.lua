@@ -1,12 +1,12 @@
-local Skynet = require "skynet"
+local skynet = require "skynet"
 local crypt = require "skynet.crypt"
-local Httpc = require "http.httpc"
-local Json = require "json"
+local httpc = require "http.httpc"
+local json = require "json"
 
 local encode_base64 = crypt.base64encode
 local decode_base64 = crypt.base64decode
-local decode_json = Json.decode
-local encode_json = Json.encode
+local decode_json = json.decode
+local encode_json = json.encode
 
 local sub_str = string.sub
 local str_byte = string.byte
@@ -23,7 +23,7 @@ mt.__index = mt
 
 local fail_hosts = {}   --响应失败的host列表
 
-Httpc.dns() -- 异步查询 dns，避免阻塞整个 skynet 的网络消息
+httpc.dns() -- 异步查询 dns，避免阻塞整个 skynet 的网络消息
 
 local function url_decode(str)
     local str = str:gsub('+', ' ')
@@ -100,7 +100,7 @@ local function get_real_key(prefix, key)
 end
 
 function mt:refresh_jwt_token(timeout)
-    local now = Skynet.time()
+    local now = skynet.time()
     if self.jwt_token and now - self.last_auth_time < 60 * 3 + random(0, 60) then
         return true
     end
@@ -114,7 +114,7 @@ function mt:refresh_jwt_token(timeout)
 
     local rspData = self:_request('POST', "/auth/authenticate", opts, timeout, true)
     if not rspData then
-        Skynet.error("ectd error refresh jwt token")
+        skynet.error("ectd error refresh jwt token")
         return false
     end
 
@@ -128,7 +128,7 @@ function mt:_get_target_status(etcd_host)
         return false
     end
     local fail_expired_time = fail_hosts[etcd_host]
-    if fail_expired_time and fail_expired_time >= Skynet.time() then
+    if fail_expired_time and fail_expired_time >= skynet.time() then
         return false
     else
         return true
@@ -139,7 +139,7 @@ function mt:_report_failure(etcd_host)
     if type(etcd_host) ~= "string" then
         return false
     end
-    fail_hosts[etcd_host] = Skynet.time() + self.fail_time
+    fail_hosts[etcd_host] = skynet.time() + self.fail_time
 end
 
 function mt:_choose_endpoint()
@@ -157,7 +157,7 @@ function mt:_http_request_uri(method, action, recvheader, header, reqData)
     if not reqHost then
         return false, NONEXIST
     end
-    local success, status, rspData = pcall(Httpc.request, method, reqHost, action, recvheader, header, reqData)
+    local success, status, rspData = pcall(httpc.request, method, reqHost, action, recvheader, header, reqData)
     -- Log.debug("request method:%s host:%s action:%s reqData:%s rspData:%s", method, reqHost, action, reqData, rspData)
     if not success then
         self:_report_failure(reqHost)
@@ -183,7 +183,7 @@ function mt:_request(method, action, opts, timeout, ignore_auth)
         reqData = encode_json(opts.body)
     end
 
-    Httpc.timeout = timeout and timeout * 100
+    httpc.timeout = timeout and timeout * 100
 
 	local header = {
 		["content-type"] = "application/x-www-form-urlencoded"
@@ -211,7 +211,7 @@ function mt:_request(method, action, opts, timeout, ignore_auth)
         end
 
         if i < max_retry then
-            Skynet.error("retrying ... ", error)
+            skynet.error("retrying ... ", error)
         end
     end
 
@@ -226,14 +226,14 @@ end
 
 function mt:_set(key, value, attr)
     if not verify_key(key) then
-        Skynet.error("set key invalid")
+        skynet.error("set key invalid")
         return false
     end
     key = encode_base64(key)
 
     value = serialize_and_encode_base64(value)
     if not value then
-        Skynet.error("set value invalid")
+        skynet.error("set value invalid")
         return false
     end
 
@@ -273,7 +273,7 @@ function mt:_set(key, value, attr)
     local rspData = self:_request('POST', "/kv/put", opts, self.timeout)
 
     if not rspData then
-        Skynet.error("ectd error set rspData:%s, key:%s, value:%s", rspData, key, value)
+        skynet.error("ectd error set rspData:%s, key:%s, value:%s", rspData, key, value)
         return false
     end
     return rspData
@@ -281,7 +281,7 @@ end
 
 function mt:_get(key, attr)
     if not verify_key(key) then
-        Skynet.error("get key invalid")
+        skynet.error("get key invalid")
         return false
     end
 
@@ -370,7 +370,7 @@ function mt:_get(key, attr)
     local rspData = self:_request("POST", "/kv/range", opts, attr.timeout)
 
     if not tab_exist(rspData) then
-        Skynet.error("ectd error get rspData:%s, key:%s", rspData, key)
+        skynet.error("ectd error get rspData:%s, key:%s", rspData, key)
         return false
     end
     if rspData and rspData.kvs and next(rspData.kvs) then
@@ -386,7 +386,7 @@ end
 
 function mt:_delete(key, attr)
     if not verify_key(key) then
-        Skynet.error("delete key invalid")
+        skynet.error("delete key invalid")
         return false
     end
     key = encode_base64(key)
@@ -413,7 +413,7 @@ function mt:_delete(key, attr)
 
     local rspData = self:_request("POST", "/kv/deleterange", opts, self.timeout)
     if not rspData then
-        Skynet.error("ectd error delete rspData:%s, key:%s", rspData, key)
+        skynet.error("ectd error delete rspData:%s, key:%s", rspData, key)
         return false
     end
     return rspData
@@ -421,12 +421,12 @@ end
 
 function mt:_txn(opts_arg, compare, success, failure)
     if #compare < 1 then
-        Skynet.error("compare couldn't be empty")
+        skynet.error("compare couldn't be empty")
         return false
     end
 
     if (success == nil or #success < 1) and (failure == nil or #failure < 1) then
-        Skynet.error("success and failure couldn't be empty at the same time")
+        skynet.error("success and failure couldn't be empty at the same time")
         return false
     end
 
@@ -441,7 +441,7 @@ function mt:_txn(opts_arg, compare, success, failure)
 
     local rspData = self:_request("POST", "/kv/txn", opts, timeout or self.timeout)
     if not rspData then
-        Skynet.error("ectd error txn rspData:%s", rspData)
+        skynet.error("ectd error txn rspData:%s", rspData)
         return false
     end
     return rspData
@@ -452,8 +452,8 @@ function mt:_http_request_stream(method, action, recvheader, header, reqData)
     if not reqHost then
         return false, NONEXIST
     end
-    local success, stream = pcall(Httpc.request_stream, method, reqHost, action, recvheader, header, reqData)
-    -- Log.debug("request method:%s host:%s action:%s reqData:%s rspData:%s", method, reqHost, action, reqData, rspData)
+    local success, stream = pcall(httpc.request_stream, method, reqHost, action, recvheader, header, reqData)
+    -- skynet.error("request method:%s host:%s action:%s reqData:%s rspData:%s", method, reqHost, action, reqData, rspData)
     if not success then
         self:_report_failure(reqHost)
         return false, reqHost .. ": request_stream error"
@@ -474,7 +474,7 @@ function mt:_request_stream(method, action, opts, timeout)
         reqData = encode_json(opts.body)
     end
 
-    Httpc.timeout = timeout and timeout * 100
+    httpc.timeout = timeout and timeout * 100
 
 	local header = {
 		["content-type"] = "application/x-www-form-urlencoded"
@@ -500,7 +500,7 @@ function mt:_request_stream(method, action, opts, timeout)
         end
 
         if i < max_retry then
-            Skynet.error("retrying ... ", error)
+            skynet.error("retrying ... ", error)
         end
     end
 
@@ -510,19 +510,19 @@ function mt:_request_stream(method, action, opts, timeout)
         end
         local success, chunk = xpcall(stream.padding, debug.traceback, stream)
         if not success then
-            Skynet.error("padding error:%s ",chunk)
+            skynet.error("padding error:%s ",chunk)
             self:_report_failure(reqHost)
             return false
         end
 
         if not chunk then
-            Skynet.error("chunk is nil")
+            skynet.error("chunk is nil")
             return false
         end
 
         local data = decode_json(chunk)
         if not data or data.error then
-            Skynet.error("failed to decode json data: " .. chunk)
+            skynet.error("failed to decode json data: " .. chunk)
             return false
         end
 
@@ -605,7 +605,7 @@ function mt:_watch(key, attr)
 
     local endpoint = self:_choose_endpoint()
     if not endpoint then
-        Skynet.error(NONEXIST)
+        skynet.error(NONEXIST)
         return false
     end
 
@@ -619,7 +619,7 @@ end
 ]]
 function mt:get(key, opts)
     if not verify_key(key) then
-        Skynet.error("key invalid")
+        skynet.error("key invalid")
         return false
     end
 
@@ -637,7 +637,7 @@ end
 ]]
 function mt:watch(key, opts)
     if not verify_key(key) then
-        Skynet.error("key invalid")
+        skynet.error("key invalid")
         return false
     end
 
@@ -667,7 +667,7 @@ end
 ]]
 function mt:readdir(key, opts)
     if not verify_key(key) then
-        Skynet.error("key invalid")
+        skynet.error("key invalid")
         return false
     end
 
@@ -691,7 +691,7 @@ end
 ]]
 function mt:watchdir(key, opts)
     if not verify_key(key) then
-        Skynet.error("key invalid")
+        skynet.error("key invalid")
         return false
     end
 
@@ -716,7 +716,7 @@ end
 ]]
 function mt:set(key, val, opts)
     if not verify_key(key) then
-        Skynet.error("key invalid")
+        skynet.error("key invalid")
         return false
     end
 
@@ -737,7 +737,7 @@ end
 ]]
 function mt:setnx(key, val, opts)
     if not verify_key(key) then
-        Skynet.error("key invalid")
+        skynet.error("key invalid")
         return false
     end
 
@@ -756,7 +756,7 @@ function mt:setnx(key, val, opts)
 
     val = serialize_and_encode_base64(val)
     if not val then
-        Skynet.error("setnx value invalid")
+        skynet.error("setnx value invalid")
         return false
     end
 
@@ -770,7 +770,7 @@ end
 ]]
 function mt:setx(key, val, opts)
     if not verify_key(key) then
-        Skynet.error("key invalid")
+        skynet.error("key invalid")
         return false
     end
 
@@ -789,7 +789,7 @@ function mt:setx(key, val, opts)
 
     val = serialize_and_encode_base64(val)
     if not val then
-        Skynet.error("setx value invalid")
+        skynet.error("setx value invalid")
         return false
     end
     failure[1].requestPut.value = val
@@ -808,7 +808,7 @@ function mt:txn(compare, success, failure, opts)
             if rule.value then
                 rule.value = serialize_and_encode_base64(rule.value)
                 if not rule.value then
-                    Skynet.error("txn value invalid")
+                    skynet.error("txn value invalid")
                     return false
                 end
             end
@@ -827,11 +827,11 @@ function mt:txn(compare, success, failure, opts)
                 requestPut.key = encode_base64(get_real_key(self.key_prefix, requestPut.key))
                 requestPut.value = serialize_and_encode_base64(requestPut.value)
                 if not requestPut.value then
-                    Skynet.error("txn value invalid")
+                    skynet.error("txn value invalid")
                     return false
                 end
                 if not requestPut.value then
-                    Skynet.error("failed to encode value")
+                    skynet.error("failed to encode value")
                     return false
                 end
 
@@ -847,12 +847,12 @@ end
 
 function mt:grant(ttl, id)
     if type(ttl) ~= "number" then
-        Skynet.error("lease grant command needs TTL argument")
+        skynet.error("lease grant command needs TTL argument")
         return false
     end
 
     if not id then
-        Skynet.error("lease grant command needs ID argument")
+        skynet.error("lease grant command needs ID argument")
         return false
     end
 
@@ -869,7 +869,7 @@ end
 
 function mt:revoke(id)
     if not id then
-        Skynet.error("lease revoke command needs ID argument")
+        skynet.error("lease revoke command needs ID argument")
         return false
     end
 
@@ -884,7 +884,7 @@ end
 
 function mt:keepalive(id)
     if not id then
-        Skynet.error("lease keepalive command needs ID argument")
+        skynet.error("lease keepalive command needs ID argument")
         return false
     end
 
@@ -899,7 +899,7 @@ end
 
 function mt:timetolive(id, keys)
     if not id then
-        Skynet.error("lease timetolive command needs ID argument")
+        skynet.error("lease timetolive command needs ID argument")
         return false
     end
 
@@ -952,7 +952,7 @@ end
 
 function mt:delete(key, opts)
     if not verify_key(key) then
-        Skynet.error("key invalid")
+        skynet.error("key invalid")
         return false
     end
 
@@ -967,7 +967,7 @@ end
 
 function mt:rmdir(key, opts)
     if not verify_key(key) then
-        Skynet.error("key invalid")
+        skynet.error("key invalid")
         return false
     end
 
@@ -989,22 +989,22 @@ function M.new(opts)
     local password = opts.password
 
     if type(hosts) ~= "table" then
-        Skynet.error("hosts must be table")
+        skynet.error("hosts must be table")
         return false
     end
 
     if key_prefix and type(key_prefix) ~= "string" then
-        Skynet.error("key_prefix must be string")
+        skynet.error("key_prefix must be string")
         return false
     end
 
     if not user then
-        Skynet.error("user error")
+        skynet.error("user error")
         return false
     end
 
     if not password then
-        Skynet.error("password error")
+        skynet.error("password error")
         return false
     end
 
