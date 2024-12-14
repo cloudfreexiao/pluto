@@ -1,10 +1,5 @@
---- Utility-belt library for functional programming in Lua ([source](http://github.com/Yonaba/Moses))
--- @author [Roland Yonaba](http://github.com/Yonaba)
--- @copyright 2012-2018
--- @license [MIT](http://www.opensource.org/licenses/mit-license.php)
--- @release 2.1.0
--- @module moses
--- @set sort=true
+--- http://github.com/Yonaba/Moses
+--- https://github.com/luafun/luafun
 
 local _MODULEVERSION             = '2.1.0'
 
