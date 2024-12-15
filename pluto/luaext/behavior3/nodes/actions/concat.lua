@@ -1,3 +1,4 @@
+---@diagnostic disable: missing-fields
 --[[
     override get descriptor(): NodeDef {
         return {

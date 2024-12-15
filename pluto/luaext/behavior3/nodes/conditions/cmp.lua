@@ -1,3 +1,4 @@
+---@diagnostic disable: missing-fields
 -- Cmp
 
 local bret = require 'behavior3.behavior_ret'

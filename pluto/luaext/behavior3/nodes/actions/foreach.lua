@@ -1,3 +1,4 @@
+---@diagnostic disable: missing-fields
 local bret = require "behavior3.behavior_ret"
 
 ---@type BehaviorNodeDefine

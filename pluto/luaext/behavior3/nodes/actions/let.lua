@@ -1,3 +1,4 @@
+---@diagnostic disable: missing-fields
 local bret = require "behavior3.behavior_ret"
 local butil = require "behavior3.behavior_util"
 
