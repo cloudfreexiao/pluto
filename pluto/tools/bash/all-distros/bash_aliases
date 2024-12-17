@@ -1,0 +1,204 @@
+#!/usr/bin/env bash
+
+# These aliases and functions have been added by aaronfranke's Linux-tools
+
+# Export useful environment variables
+export GPG_TTY=$(tty)
+export SCONSFLAGS="werror=yes"
+
+# Aliases for simple common commands
+alias butler="$HOME/.config/itch/apps/butler/butler"
+alias cstabs="find . -name '*.cs' -exec sed -i -e 's/    /\t/g' {} \;"
+alias tscnnoeditor="find . -name '*.tscn' -exec sed -i '/^editor\//d' {} \;" # Remove "editor/display_folded"
+alias extract="tar -xf"
+alias gitfixtime="git commit --amend --reset-author --no-edit"
+alias la="ls -la"
+alias ll="ls -l"
+alias lookfor="grep -RIni"
+alias nani='echo "Omae wa mou shindeiru" && sleep 3s && nano'
+alias fuck='sudo $(history -p !!)'
+alias redo='sudo $(history -p !!)'
+alias sdd="sudo dcfldd" # Replaces "sudo dd", requires "dcfldd" to be installed.
+
+# Functions for more complex operations. Most are just for mass-converting audio.
+acid() {
+    NUMBER=1.0
+    while true; do
+        NUMBER=$(echo "($NUMBER + 2.99) % 10 - 3" | bc)
+        sleep 0.01
+        xrandr --output LVDS --brightness $NUMBER
+    done
+}
+
+downloadwebsite() {
+    DOMAIN=$(echo $1 | awk -F '/' '{print $1}' | awk -F '.' '{print $2,$3}' OFS=".")
+    wget \
+     --recursive \
+     --no-clobber \
+     --page-requisites \
+     --html-extension \
+     --convert-links \
+     --restrict-file-names=windows \
+     --domains $DOMAIN \
+     --no-parent \
+         $1
+}
+
+fetchall() {
+    cd "$HOME/workspace"
+    for i in *; do
+        cd "$HOME/workspace/$i"
+        pwd
+        git fetch --all
+    done
+}
+
+pr() {
+    : ${1?"Usage: pr 12345"}
+    git fetch origin "pull/$1/head:pr/$1" || return 1
+    git switch "pr/$1" || return 1
+}
+
+qr() {
+    command -v qrencode >/dev/null 2>&1 || { echo >&2 "Please install qrencode with 'sudo apt install qrencode' or 'sudo pacman -S qrencode'."; return 1; }
+    : ${1?"Usage: qr https://example.com"}
+    qrencode --type=ansiutf8 --level=H "$@" || return 1
+}
+
+gk() {
+    if [[ "$OSTYPE" != "linux"* ]]; then echo "Only Linux is supported."; return 1; fi
+    command -v gitkraken >/dev/null 2>&1 || { echo >&2 "GitKraken is not installed, cannot open current directory."; return 1; }
+    gitkraken "$(pwd)"
+}
+
+port() {
+  : ${1?"Finds processes using port. Example: port 80"}
+  sudo lsof -i :"$1" || echo "Port is not in use."
+}
+
+format() {
+    find . -regex '.*\.\(cpp\|hpp\|cc\|cxx\)' -exec clang-format -style=file -i {} \;
+}
+
+recursive() {
+    find . -type f -exec "$*" {} \;
+}
+
+releasemouse() {
+    setxkbmap -option grab:break_actions
+    xdotool key XF86Ungrab
+}
+
+replaceall() {
+    find . -name "*.$1" -exec sed -i -e "s/$2/$3/g" {} \;
+}
+
+updatemaster() {
+    git fetch godotengine
+    git checkout master
+    git reset godotengine/master
+    git checkout .
+    git push
+}
+
+svgopt() {
+    for file in *; do
+        svgcleaner $file $file.opt.svg
+        mv $file.opt.svg $file
+    done
+}
+
+# Media converting methods.
+
+mp3ogg() {
+    for i in *.mp3; do
+        name=`echo $i | cut -d'.' -f1`
+        echo "Converting ${name}.mp3 "
+        ffmpeg -y -i "$i" -vn "${name}.ogg" 2> /dev/null
+    done
+    echo "Done! "
+}
+
+m4aogg() {
+    for i in *.m4a; do
+        name=`echo $i | cut -d'.' -f1`
+        echo "Converting ${name}.m4a "
+        ffmpeg -y -i "$i" -vn "${name}.ogg" 2> /dev/null
+    done
+    echo "Done! "
+}
+
+mkvogg() {
+    for i in *.mkv; do
+        name=`echo $i | cut -d'.' -f1`
+        echo "Converting ${name}.mkv "
+        ffmpeg -y -i "$i" -vn "${name}.ogg" 2> /dev/null
+    done
+    echo "Done! "
+}
+
+mp4ogg() {
+    for i in *.mp4; do
+        name=`echo $i | cut -d'.' -f1`
+        echo "Converting ${name}.mp4 "
+        ffmpeg -y -i "$i" -vn "${name}.ogg" 2> /dev/null
+    done
+    echo "Done! "
+}
+
+wavogg() {
+    for i in *.wav; do
+        name=`echo $i | cut -d'.' -f1`
+        echo "Converting ${name}.wav "
+        ffmpeg -y -i "$i" -vn "${name}.ogg" 2> /dev/null
+    done
+    echo "Done! "
+}
+
+opusogg() {
+    for i in *.opus; do
+        name=`echo $i | cut -d'.' -f1`
+        echo "Converting ${name}.opus "
+        ffmpeg -y -i "$i" -vn "${name}.ogg" 2> /dev/null
+    done
+    echo "Done! "
+}
+
+webmopus() {
+    for i in *.webm; do
+        name=`echo $i | cut -d'.' -f1`
+        echo "Converting ${name}.webm "
+        ffmpeg -y -i "$i" -vn -c:a copy "${name}.opus" 2> /dev/null
+    done
+    echo "Done! "
+}
+
+stripogg() {
+    for i in *.ogg; do
+        name=`echo $i | cut -d'.' -f1`
+        echo "Stripping audio from ${name}.ogg "
+        ffmpeg -y -i "$i" -vn -codec:a copy -map_metadata -1 "${name}.tmp.ogg" 2> /dev/null
+        rm -f "$i"
+        mv "${name}.tmp.ogg" "$i"
+    done
+    echo "Done! "
+}
+
+pdd() {
+        : ${1?"Usage: pdd if=/dev/zero of=/dev/null"}
+        cmd="sudo dd $@ status=progress"
+
+        echo
+        echo "PLEASE REVIEW THE COMMAND AND DEVICE LIST BELOW."
+        echo
+        echo "Command: '$cmd'"
+        echo
+        echo "Devices:"
+        lsblk
+        echo
+        echo -n 'THE DISK OR FILE AFTER "of=" WILL BE PERMANENTLY OVERWRITTEN. Type 'yes' to confirm: ' && read 'x' && [ $x == 'yes' ] || return
+        echo "Running in 5 seconds... Ctrl+C to cancel."
+        sleep 5 || return
+        echo
+        $cmd
+}
