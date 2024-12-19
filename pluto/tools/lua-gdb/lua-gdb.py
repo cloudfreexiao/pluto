@@ -2,9 +2,11 @@ from __future__ import print_function
 import re
 import sys
 
-print("Loading Lua Runtime support.", file=sys.stderr)
 # http://python3porting.com/differences.html
 # https://github.com/xjdrew/lua-gdb
+# https://github.com/hanxi/blog/issues/84
+
+print("Loading Lua Runtime support.", file=sys.stderr)
 if sys.version > '3':
     xrange = range
 
