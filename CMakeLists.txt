@@ -202,6 +202,10 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     aux_source_directory(pluto/luaclib/luasyslog SYSLOG_SRC)
     add_library(lsyslog SHARED ${SYSLOG_SRC})
 
+    # 生成动态库 miniz.so
+    aux_source_directory(pluto/luaclib/lua-miniz Z_SRC)
+    add_library(miniz SHARED ${Z_SRC})
+
     # 生成动态库 clonefunc.so
     aux_source_directory(pluto/luaclib/clonefunc CLONEFUNC_SRC)
     add_library(clonefunc SHARED ${CLONEFUNC_SRC} ${LUA_LIB_SRC})
@@ -210,7 +214,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     set_target_properties(
         lpeg sproto client md5 bson ltls
         pb lfs fmt yyjson zset aoi navmesh 
-        math3d rp3d lsyslog clonefunc
+        math3d rp3d lsyslog miniz clonefunc
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
@@ -443,6 +447,11 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
                 3rd/reactphysics3d/include/reactphysics3d/utils/quickhull/ )
     target_link_libraries(rp3d liblua)
 
+    # 生成动态库 miniz.so
+    aux_source_directory(pluto/luaclib/lua-miniz Z_SRC)
+    add_library(miniz SHARED ${Z_SRC})
+    target_link_libraries(miniz liblua)
+
     # 生成动态库 clonefunc.so
     aux_source_directory(pluto/luaclib/clonefunc CLONEFUNC_SRC)
     add_library(clonefunc SHARED ${CLONEFUNC_SRC} ${LUA_LIB_SRC})
@@ -452,7 +461,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     set_target_properties(
         lpeg sproto client md5 bson skynetso ltls
         pb lfs fmt yyjson zset aoi navmesh
-        math3d rp3d clonefunc
+        math3d rp3d miniz clonefunc
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
@@ -667,6 +676,10 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     aux_source_directory(pluto/luaclib/luasyslog SYSLOG_SRC)
     add_library(lsyslog SHARED ${SYSLOG_SRC})
 
+    # 生成动态库 miniz.so
+    aux_source_directory(pluto/luaclib/lua-miniz Z_SRC)
+    add_library(miniz SHARED ${Z_SRC})
+
     # 生成动态库 clonefunc.so
     aux_source_directory(pluto/luaclib/clonefunc CLONEFUNC_SRC)
     add_library(clonefunc SHARED ${CLONEFUNC_SRC} ${LUA_LIB_SRC})
@@ -675,7 +688,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     set_target_properties(
         lpeg sproto client md5 bson ltls
         pb lfs fmt yyjson zset aoi navmesh
-        math3d rp3d lsyslog clonefunc
+        math3d rp3d lsyslog miniz clonefunc
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
