@@ -76,7 +76,7 @@ return rp3d
 
 
 -- local math3d = require "math3d"
--- local rp3d = require "misc.rp3d"
+-- local rp3d = require "rp3d"
 
 -- rp3d.init() -- init math adapter, shape interning
 

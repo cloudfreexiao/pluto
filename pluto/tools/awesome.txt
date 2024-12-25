@@ -12,7 +12,6 @@ https://github.com/FEMessage/log-viewer
 https://github.com/fatedier/frp
 https://github.com/baihengaead/wifi-crack-tool
 https://github.com/rustdesk/rustdesk
-https://github.com/go-co-op/gocron
 https://github.com/chaitin/SafeLine
 https://github.com/amir20/dozzle
 https://github.com/PY44N/LuaObfuscatorV2

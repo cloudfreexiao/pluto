@@ -13,13 +13,6 @@
 * 支持单个选择导出
 * 支持导出`.fbx`模型
 
-## 截图
-
-<img src="Documentation/screenshot/scene.jpg" width="1024" height="auto"/>
-<img src="Documentation/screenshot/export.jpg" width="1024" height="auto"/>
-<img src="Documentation/screenshot/part.jpg" width="1024" height="auto"/>
-<img src="Documentation/screenshot/select.jpg" width="1024" height="auto"/>
-
 ## 用法
 
 * 通过下载源码或`unitypackage`包导入到你的项目中（放在`Assets`目录下）。如果你是`2018.3`及以上版本，可通过`Package Manager`的`Git`来导入包（也可以下载后本地安装包）：

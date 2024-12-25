@@ -24,7 +24,7 @@
 -- | Day of week  | 1-27            |       , - *        |
 -- +-----------------------------------------------------+
 --
-local timex = require("misc.timex")
+local timex = require("timex")
 
 local Crontab = {}
 

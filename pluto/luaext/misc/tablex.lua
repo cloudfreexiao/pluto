@@ -1,6 +1,6 @@
 local random = math.random
 local type = type
-local stringx = require "misc.stringx"
+local stringx = require "stringx"
 
 local tablex = {}
 
