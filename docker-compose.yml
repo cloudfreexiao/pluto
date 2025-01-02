@@ -8,7 +8,7 @@ services:
       # REDIS_DISABLE_COMMANDS: FLUSHDB,FLUSHALL
       ALLOW_EMPTY_PASSWORD: yes
     ports:
-      - 9001:6379
+      - 9501:6379
     volumes:
       - redis_data:/bitnami/redis/data
     networks:
@@ -23,7 +23,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: pluto
       MONGO_INITDB_DATABASE: pluto
     ports:
-      - 9002:27017
+      - 9502:27017
     volumes:
       - mongo_data:/bitnami/mongodb
     networks:
@@ -37,8 +37,8 @@ services:
       ALLOW_NONE_AUTHENTICATION: yes
       ETCD_ADVERTISE_CLIENT_URLS: http://etcd:2379
     ports:
-      - 9003:2379
-      - 9004:2380
+      - 9503:2379
+      - 9504:2380
     volumes:
       - etcd_data:/bitnami/etcd
     networks:
