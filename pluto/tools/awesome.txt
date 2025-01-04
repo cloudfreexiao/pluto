@@ -23,6 +23,8 @@ https://github.com/bufbuild/buf
 https://github.com/grafana/loki
 https://github.com/ccfos/nightingale
 https://github.com/redpanda-data/redpanda
+https://github.com/fluent/fluent-bit
+https://github.com/meilisearch/meilisearch
 
 https://github.com/amir20/dozzle
 https://github.com/heyvaldemar/gitea-traefik-letsencrypt-docker-compose
@@ -30,11 +32,15 @@ https://github.com/lutinglt/gitea-github-theme
 
 https://github.com/logto-io/logto
 https://github.com/vicanso/pingap
-https://github.com/authelia/authelia
 https://github.com/chaitin/SafeLine
-https://github.com/zhllxt/asio3
 https://github.com/wasm3/wasm3
 https://github.com/gofiber/fiber
 https://github.com/dobyte/due
-https://github.com/meilisearch/meilisearch
 https://github.com/psygames/UnityWebSocket
+
+https://github.com/zhllxt/asio3
+https://github.com/alibaba/yalantinglibs
+
+https://github.com/honojs/hono
+https://github.com/authelia/authelia
+https://github.com/openauthjs/openauth
