@@ -25,6 +25,8 @@ https://github.com/ccfos/nightingale
 https://github.com/redpanda-data/redpanda
 https://github.com/fluent/fluent-bit
 https://github.com/meilisearch/meilisearch
+https://github.com/cockroachdb/cockroach
+https://github.com/FerretDB/FerretDB
 
 https://github.com/amir20/dozzle
 https://github.com/heyvaldemar/gitea-traefik-letsencrypt-docker-compose
@@ -37,10 +39,12 @@ https://github.com/wasm3/wasm3
 https://github.com/gofiber/fiber
 https://github.com/dobyte/due
 https://github.com/psygames/UnityWebSocket
-
+https://github.com/pojol/gobot
+https://github.com/hcengine/hcengine
+https://github.com/esrrhs/cLua
 https://github.com/zhllxt/asio3
 https://github.com/alibaba/yalantinglibs
-
 https://github.com/honojs/hono
 https://github.com/authelia/authelia
 https://github.com/openauthjs/openauth
+https://github.com/ptrefall/fluid-hierarchical-task-network
