@@ -207,7 +207,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     add_library(miniz SHARED ${Z_SRC})
 
     # 生成动态库 clonefunc.so
-    aux_source_directory(pluto/luaclib/clonefunc CLONEFUNC_SRC)
+    aux_source_directory(pluto/luaclib/lua-clonefunc CLONEFUNC_SRC)
     add_library(clonefunc SHARED ${CLONEFUNC_SRC} ${LUA_LIB_SRC})
     target_include_directories(clonefunc PRIVATE skynet/skynet-src)
 
@@ -453,7 +453,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     target_link_libraries(miniz liblua)
 
     # 生成动态库 clonefunc.so
-    aux_source_directory(pluto/luaclib/clonefunc CLONEFUNC_SRC)
+    aux_source_directory(pluto/luaclib/lua-clonefunc CLONEFUNC_SRC)
     add_library(clonefunc SHARED ${CLONEFUNC_SRC} ${LUA_LIB_SRC})
     target_include_directories(clonefunc PRIVATE skynet/skynet-src)
 
@@ -681,7 +681,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     add_library(miniz SHARED ${Z_SRC})
 
     # 生成动态库 clonefunc.so
-    aux_source_directory(pluto/luaclib/clonefunc CLONEFUNC_SRC)
+    aux_source_directory(pluto/luaclib/lua-clonefunc CLONEFUNC_SRC)
     add_library(clonefunc SHARED ${CLONEFUNC_SRC} ${LUA_LIB_SRC})
     target_include_directories(clonefunc PRIVATE skynet/skynet-src)
 
