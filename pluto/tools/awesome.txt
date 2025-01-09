@@ -56,7 +56,10 @@ https://github.com/authelia/authelia
 https://github.com/openauthjs/openauth
 https://github.com/ptrefall/fluid-hierarchical-task-network
 https://github.com/samber/lo
-https://github.com/runtime-blocks/crb
 https://github.com/genaray/Arch
 https://github.com/microsoft/proxy
 https://github.com/NVIDIA/stdexec
+https://github.com/anthdm/hollywood
+https://github.com/ergo-services/ergo
+https://github.com/slawlor/ractor
+https://github.com/runtime-blocks/crb
