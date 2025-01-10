@@ -37,6 +37,8 @@ https://github.com/paradedb/paradedb
 https://github.com/amir20/dozzle
 https://github.com/heyvaldemar/gitea-traefik-letsencrypt-docker-compose
 https://github.com/lutinglt/gitea-github-theme
+https://github.com/Kong/insomnia
+https://github.com/triggerdotdev/trigger.dev
 
 有用的一些库
 https://github.com/logto-io/logto
