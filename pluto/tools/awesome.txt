@@ -14,6 +14,7 @@ https://github.com/tiny-craft/tiny-rdm
 https://github.com/mongodb-js/compass
 https://github.com/lima-vm/lima
 https://github.com/loft-sh/devpod
+https://github.com/jetify-com/devbox
 
 https://github.com/1Panel-dev/1Panel
 https://github.com/0xJacky/nginx-ui
@@ -33,6 +34,7 @@ https://github.com/meilisearch/meilisearch
 https://github.com/cockroachdb/cockroach
 https://github.com/pingcap/tidb
 https://github.com/FerretDB/FerretDB
+https://github.com/dragonflydb/dragonfly
 https://github.com/paradedb/paradedb
 https://github.com/amir20/dozzle
 https://github.com/heyvaldemar/gitea-traefik-letsencrypt-docker-compose
@@ -47,7 +49,6 @@ https://github.com/chaitin/SafeLine
 https://github.com/wasm3/wasm3
 https://github.com/gofiber/fiber
 https://github.com/dobyte/due
-https://github.com/psygames/UnityWebSocket
 https://github.com/pojol/gobot
 https://github.com/hcengine/hcengine
 https://github.com/esrrhs/cLua
@@ -57,6 +58,7 @@ https://github.com/honojs/hono
 https://github.com/authelia/authelia
 https://github.com/openauthjs/openauth
 https://github.com/ptrefall/fluid-hierarchical-task-network
+https://github.com/heroiclabs/nakama-dotnet
 https://github.com/samber/lo
 https://github.com/genaray/Arch
 https://github.com/microsoft/proxy
