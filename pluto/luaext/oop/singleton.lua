@@ -23,8 +23,4 @@ function singleton.static:instance(...)
     return self._instance
 end
 
-function singleton.static:clear_instance()
-    self._instance = nil
-end
-
 return singleton
