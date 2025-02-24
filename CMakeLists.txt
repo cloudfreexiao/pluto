@@ -492,10 +492,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     message(STATUS "current platform: Mac OS X")
     add_compile_definitions(NOUSE_JEMALLOC LUA_USE_MACOSX LUA_USE_READLINE)
 
-    # 设置编译器
-    set(CMAKE_C_COMPILER "clang")
-    set(CMAKE_CXX_COMPILER "clang++")
-
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -Wall ")
     set(CMAKE_SHARED_LINKER_FLAGS " -fPIC -dynamiclib -Wl,-undefined,dynamic_lookup")
 
