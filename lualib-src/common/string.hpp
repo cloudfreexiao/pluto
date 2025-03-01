@@ -1,4 +1,5 @@
 #pragma once
+#include "common.hpp"
 
 namespace pluto {
 template<typename T, std::enable_if_t<std::is_floating_point_v<T>, int> = 0>
@@ -167,6 +168,45 @@ std::vector<T> split(const std::string_view& src, const std::string_view& sep) {
     return r;
 }
 
+inline std::string format(const char* fmt, ...) {
+    if (!fmt)
+        return std::string("");
+
+    size_t fmt_buffer_size = 1024;
+
+    std::string res;
+    res.resize(fmt_buffer_size);
+
+    va_list ap;
+    va_start(ap, fmt);
+    int len = moon_vsnprintf(res.data(), res.size(), fmt, ap);
+    va_end(ap);
+    if (len >= 0 && len <= static_cast<int>(res.size())) {
+        res.resize(len);
+        return res;
+    } else {
+        for (;;) {
+            fmt_buffer_size *= 2;
+            res.resize(fmt_buffer_size);
+            va_start(ap, fmt);
+            len = moon_vsnprintf(res.data(), res.size(), fmt, ap);
+            va_end(ap);
+            if (len < 0) {
+                continue;
+            } else {
+                res.resize(len);
+                break;
+            }
+        }
+    }
+
+    if (len < 0) {
+        std::cerr << "vsnprintf error :" << std::endl;
+        return std::string("");
+    }
+    return res;
+}
+
 //return left n char
 inline std::string left(const std::string& str, size_t n) {
     return std::string(str, 0, n);
@@ -226,13 +266,13 @@ inline char tolower(unsigned char c) {
     return static_cast<char>(std::tolower(c));
 }
 
-// inline void upper(std::string& src) {
-//     std::transform(src.begin(), src.end(), src.begin(), toupper);
-// }
+inline void upper(std::string& src) {
+    std::transform(src.begin(), src.end(), src.begin(), toupper);
+}
 
-// inline void lower(std::string& src) {
-//     std::transform(src.begin(), src.end(), src.begin(), tolower);
-// }
+inline void lower(std::string& src) {
+    std::transform(src.begin(), src.end(), src.begin(), tolower);
+}
 
 //! case insensitive
 inline bool iequal_string_locale(
@@ -288,7 +328,7 @@ inline std::string hex_string(std::string_view text) {
     return res;
 }
 
-inline std::string escape_non_printable(std::string_view input) {
+inline std::string escape_print(std::string_view input) {
     static constexpr std::string_view hex = "0123456789abcdef";
     std::string res;
     for (char ch: input) {

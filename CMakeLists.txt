@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # 把lua头文件添加到全局搜索路径
 include_directories(skynet/3rd/lua/
+                    lualib-src/common/
                     3rd/sol/include/)
 
 # Linux
@@ -127,6 +128,10 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     aux_source_directory(lualib-src/lua-yyjson YYJSON_SRC)
     add_library(yyjson SHARED ${YYJSON_SRC})
 
+    # 生成动态库 buffer.so
+    aux_source_directory(lualib-src/lua-buffer BUFFER_SRC)
+    add_library(buffer SHARED ${BUFFER_SRC})
+
     # 生成动态库 zset.so
     aux_source_directory(lualib-src/lua-zset ZSET_SRC)
     add_library(zset SHARED ${ZSET_SRC})
@@ -214,7 +219,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
 
     set_target_properties(
         lpeg sproto client md5 bson ltls
-        pb lfs fmt yyjson zset aoi navmesh 
+        pb lfs fmt yyjson buffer zset aoi navmesh 
         math3d rp3d lsyslog miniz clonefunc
         PROPERTIES
         PREFIX ""
@@ -371,6 +376,11 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     add_library(yyjson SHARED ${YYJSON_SRC})
     target_link_libraries(yyjson liblua)
 
+    # 生成动态库 buffer.so
+    aux_source_directory(lualib-src/lua-buffer BUFFER_SRC)
+    add_library(buffer SHARED ${BUFFER_SRC})
+    target_link_libraries(buffer liblua)
+
     # 生成动态库 zset.so
     aux_source_directory(lualib-src/lua-zset ZSET_SRC)
     add_library(zset SHARED ${ZSET_SRC})
@@ -461,7 +471,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     # 设置动态库属性
     set_target_properties(
         lpeg sproto client md5 bson skynetso ltls
-        pb lfs fmt yyjson zset aoi navmesh
+        pb lfs fmt yyjson buffer zset aoi navmesh
         math3d rp3d miniz clonefunc
         PROPERTIES
         PREFIX ""
@@ -602,6 +612,10 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     aux_source_directory(lualib-src/lua-yyjson YYJSON_SRC)
     add_library(yyjson SHARED ${YYJSON_SRC})
 
+    # 生成动态库 buffer.so
+    aux_source_directory(lualib-src/lua-buffer BUFFER_SRC)
+    add_library(buffer SHARED ${BUFFER_SRC})
+
     # 生成动态库 zset.so
     aux_source_directory(lualib-src/lua-zset ZSET_SRC)
     add_library(zset SHARED ${ZSET_SRC})
@@ -688,7 +702,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 
     set_target_properties(
         lpeg sproto client md5 bson ltls
-        pb lfs fmt yyjson zset aoi navmesh
+        pb lfs fmt yyjson buffer zset aoi navmesh
         math3d rp3d lsyslog miniz clonefunc
         PROPERTIES
         PREFIX ""
