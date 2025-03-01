@@ -8,7 +8,7 @@
 #include "buffer.hpp"
 #include "hash.hpp"
 #include "string.hpp"
-#include "yyjson.c"
+#include "yyjson.h"
 
 using namespace pluto;
 
