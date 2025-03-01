@@ -1,39 +1,25 @@
-
 #include <charconv>
 #include <codecvt>
 #include <cstdlib>
 #include <string_view>
-#include <lua.hpp>
 
+#include <lua.hpp>
 #include "buffer.hpp"
 #include "hash.hpp"
 #include "string.hpp"
 #include "yyjson.h"
 
-using namespace pluto;
 
 static void* json_malloc(void*, size_t size) {
-#ifdef MOON_ENABLE_MIMALLOC
-    return mi_malloc(size);
-#else
     return std::malloc(size);
-#endif
 }
 
 static void* json_realloc(void*, void* ptr, size_t, size_t size) {
-#ifdef MOON_ENABLE_MIMALLOC
-    return mi_realloc(ptr, size);
-#else
     return std::realloc(ptr, size);
-#endif
 }
 
 static void json_free(void*, void* ptr) {
-#ifdef MOON_ENABLE_MIMALLOC
-    mi_free(ptr);
-#else
     std::free(ptr);
-#endif
 }
 static const yyjson_alc allocator = { json_malloc, json_realloc, json_free, nullptr };
 
@@ -169,13 +155,6 @@ static void format_space(buffer* writer, int n) {
     }
 }
 
-inline void write_number(buffer* writer, lua_Number num) {
-    auto[buf, n] = writer->prepare(32);
-    uint64_t raw = f64_to_raw(num);
-    auto e = write_f64_raw((uint8_t*)buf, raw, YYJSON_WRITE_ALLOW_INF_AND_NAN);
-    writer->commit(e - (uint8_t*)buf);
-}
-
 template<bool format>
 static void encode_table(lua_State* L, buffer* writer, int idx, int depth);
 
@@ -194,7 +173,7 @@ static void encode_one(lua_State* L, buffer* writer, int idx, int depth, json_co
             if (lua_isinteger(L, idx))
                 writer->write_chars(lua_tointeger(L, idx));
             else
-                write_number(writer, lua_tonumber(L, idx));
+                writer->write_chars(lua_tonumber(L, idx));
             return;
         }
         case LUA_TSTRING: {
@@ -569,7 +548,7 @@ static int concat(lua_State* L) {
                     if (lua_isinteger(L, -1))
                         buf->write_chars(lua_tointeger(L, -1));
                     else
-                        write_number(buf, lua_tonumber(L, -1));
+                        buf->write_chars(lua_tonumber(L, -1));
                     break;
                 }
                 case LUA_TBOOLEAN: {
