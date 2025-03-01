@@ -55,11 +55,12 @@ inline int moon_vsnprintf(char* buffer, size_t count, const char* format, va_lis
     return vsnprintf_s(buffer, count, _TRUNCATE, format, argptr);
 }
 
-    #ifdef _WIN64
-typedef __int64 ssize_t;
-    #else
-typedef _W64 int ssize_t;
-    #endif
+//     #ifdef _WIN64
+// typedef __int64 ssize_t;
+//     #else
+// typedef _W64 int ssize_t;
+//     #endif
+
     #define MOON_EXPORT __declspec(dllexport)
 #else
     #include <sys/syscall.h>
