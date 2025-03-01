@@ -61,12 +61,12 @@ inline int moon_vsnprintf(char* buffer, size_t count, const char* format, va_lis
 // typedef _W64 int ssize_t;
 //     #endif
 
-    // #define MOON_EXPORT __declspec(dllexport)
+    #define MOON_EXPORT __declspec(dllexport)
 #else
     #include <sys/syscall.h>
     #include <unistd.h>
     #define moon_vsnprintf vsnprintf
-    // #define MOON_EXPORT
+    #define MOON_EXPORT
 #endif
 
 #ifndef __has_feature // Clang - feature checking macros.
