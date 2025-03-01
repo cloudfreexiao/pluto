@@ -1,12 +1,55 @@
 #include <lua.hpp>
 #include "navmesh.hpp"
-#include "lua_utility.hpp"
-
-using namespace pluto;
 
 #define METANAME "__lnavmesh"
 
 using navmesh_type = pluto::navmesh;
+
+// https://en.cppreference.com/w/cpp/language/if
+template <class>
+inline constexpr bool dependent_false_v = false;
+
+template <typename Type>
+Type lua_check(lua_State *L, int index)
+{
+    using T = std::decay_t<Type>;
+    if constexpr (std::is_same_v<T, std::string_view>)
+    {
+        size_t size;
+        const char *sz = luaL_checklstring(L, index, &size);
+        return std::string_view{sz, size};
+    }
+    else if constexpr (std::is_same_v<T, std::string>)
+    {
+        size_t size;
+        const char *sz = luaL_checklstring(L, index, &size);
+        return std::string{sz, size};
+    }
+    else if constexpr (std::is_same_v<T, bool>)
+    {
+        if (!lua_isboolean(L, index))
+            luaL_typeerror(L, index, lua_typename(L, LUA_TBOOLEAN));
+        return (bool)lua_toboolean(L, index);
+    }
+    else if constexpr (std::is_integral_v<T>)
+    {
+        auto v = luaL_checkinteger(L, index);
+        luaL_argcheck(
+            L,
+            static_cast<lua_Integer>(static_cast<T>(v)) == v,
+            index,
+            "integer out-of-bounds");
+        return static_cast<T>(v);
+    }
+    else if constexpr (std::is_floating_point_v<T>)
+    {
+        return static_cast<T>(luaL_checknumber(L, index));
+    }
+    else
+    {
+        static_assert(dependent_false_v<T>, "unsupport type");
+    }
+}
 
 static int load_static(lua_State *L)
 {
