@@ -1,13 +1,13 @@
-
 #include <lua.hpp>
 #include "buffer.hpp"
 #include "byte_convert.hpp"
 
 using namespace pluto;
 
-constexpr int MAX_DEPTH = 32;
 using buffer_ptr_t = std::unique_ptr<buffer>;
 using buffer_shr_ptr_t = std::shared_ptr<buffer>;
+
+constexpr int MAX_DEPTH = 32;
 
 static buffer* get_pointer(lua_State* L, int index) {
     buffer* b = nullptr;
@@ -47,7 +47,7 @@ static void pushinteger(lua_State* L, const char*& b, const char* e, bool little
     memcpy(&v, b, sizeof(T));
     b += sizeof(T);
     if (!little)
-    pluto::host2net(v);
+        pluto::host2net(v);
     lua_pushinteger(L, v);
 }
 
@@ -155,15 +155,14 @@ static void concat_one(lua_State* L, buffer* b, int index, int depth) {
             break;
         }
         case LUA_TBOOLEAN: {
-            int n = lua_toboolean(L, index);
-            std::string_view s = n ? "true" : "false";
-            b->write_back(s.data(), s.size());
+            constexpr std::string_view bool_string[2] = { "false", "true" };
+            b->write_back(bool_string[lua_toboolean(L, index)]);
             break;
         }
         case LUA_TSTRING: {
             size_t sz = 0;
             const char* str = lua_tolstring(L, index, &sz);
-            b->write_back(str, sz);
+            b->write_back({ str, sz });
             break;
         }
         case LUA_TTABLE: {
@@ -334,7 +333,7 @@ static int append(lua_State* L) {
     try {
         if (int n = lua_gettop(L); n == 2) {
             auto append = get_pointer(L, 2);
-            buf->write_back(append->data(), append->size());
+            buf->write_back({ append->data(), append->size() });
         } else {
             size_t size = 0;
             for (int i = 2; i <= n; i++) {
