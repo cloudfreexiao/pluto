@@ -332,12 +332,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     add_library(md5 SHARED ${LUA_MD5_SRC})
     target_link_libraries(md5 liblua)
 
-    # 生成动态库 client.so
-    add_library(client SHARED skynet/lualib-src/lua-clientsocket.c
-                        skynet/lualib-src/lua-crypt.c
-                        skynet/lualib-src/lsha1.c)
-    target_link_libraries(client ws2_32 liblua libposix pthreadVC3)
-
     # 生成动态库 sproto.so
     aux_source_directory(skynet/lualib-src/sproto SPROTO_SRC)
     add_library(sproto SHARED ${SPROTO_SRC})
@@ -467,7 +461,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
 
     # 设置动态库属性
     set_target_properties(
-        lpeg sproto client md5 bson skynetso ltls
+        lpeg sproto md5 bson skynetso ltls
         pb lfs fmt yyjson buffer zset aoi navmesh
         math3d rp3d miniz clonefunc
         PROPERTIES
