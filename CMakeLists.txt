@@ -40,12 +40,12 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     # 编译 lua 可执行文件
     add_executable(lua ${LUA_LIB_SRC} "skynet/3rd/lua/lua.c")
     target_include_directories(lua PRIVATE skynet/skynet-src)
-    target_link_libraries(lua m readline)
+    target_link_libraries(lua m readline dl)
 
     # 编译 luac 可执行文件
     add_executable(luac ${LUA_LIB_SRC} "skynet/3rd/lua/luac.c")
     target_include_directories(luac PRIVATE skynet/skynet-src)
-    target_link_libraries(luac m readline)
+    target_link_libraries(luac m readline dl)
 
     # 编译 skynet 可执行文件
     aux_source_directory(skynet/skynet-src SKYNET_SRC)
