@@ -1,6 +1,6 @@
 ## Pluto
    [skynet](https://github.com/cloudwu/skynet) 以CMake方式组织工程的跨平台的实现.
-
+   
 ## 特点
     1. 跨平台 windows linux macosx
     2. 支持在 vs2022 xcode vscode 的IDE编译运行
@@ -33,7 +33,9 @@ git clone --recurse-submodules git@github.com:cloudfreexiao/pluto.git
     2. 执行 xcode.sh 生成工程文件,编译
     3. 使用 vscode 打开此工程目录(确保安装c++插件)
 
+
 ## 参考
 
+- [wiki](https://deepwiki.com/cloudfreexiao/pluto)
 - [skynet-cmake](https://github.com/hanxi/skynet-cmake)
 - [moon](https://github.com/sniper00/moon)
