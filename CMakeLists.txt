@@ -105,12 +105,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     aux_source_directory(skynet/3rd/lpeg LPEG_SRC)
     add_library(lpeg SHARED ${LPEG_SRC})
 
-    # 生成动态库 ltls.so
-    add_library(ltls SHARED skynet/lualib-src/ltls.c)
-    target_include_directories(ltls PRIVATE 3rd/openssl/include/)
-    target_link_directories(ltls PRIVATE 3rd/openssl/lib/linux/)
-    target_link_libraries(ltls ssl crypto)
-
     # 生成动态库 pb.so
     aux_source_directory(lualib-src/lua-protobuf PB_SRC)
     add_library(pb SHARED ${PB_SRC})
@@ -216,7 +210,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     target_include_directories(clonefunc PRIVATE skynet/skynet-src)
 
     set_target_properties(
-        lpeg sproto client md5 bson ltls
+        lpeg sproto client md5 bson
         pb lfs fmt yyjson buffer zset aoi navmesh 
         math3d rp3d lsyslog miniz clonefunc
         PROPERTIES
@@ -342,12 +336,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     add_library(lpeg SHARED ${LPEG_SRC})
     target_link_libraries(lpeg liblua)
 
-    # 生成动态库 ltls.so
-    add_library(ltls SHARED skynet/lualib-src/ltls.c)
-    target_include_directories(ltls PRIVATE 3rd/openssl/include/)
-    target_link_directories(ltls PRIVATE 3rd/openssl/lib/windows/)
-    target_link_libraries(ltls ws2_32 mswsock liblua libposix pthreadVC3 libssl libcrypto Crypt32)
-
     # 生成动态库 pb.so
     aux_source_directory(lualib-src/lua-protobuf PB_SRC)
     add_library(pb SHARED ${PB_SRC})
@@ -461,7 +449,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
 
     # 设置动态库属性
     set_target_properties(
-        lpeg sproto md5 bson skynetso ltls
+        lpeg sproto md5 bson skynetso
         pb lfs fmt yyjson buffer zset aoi navmesh
         math3d rp3d miniz clonefunc
         PROPERTIES
@@ -581,12 +569,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     aux_source_directory(skynet/3rd/lpeg LPEG_SRC)
     add_library(lpeg SHARED ${LPEG_SRC})
 
-    # 生成动态库 ltls.so
-    add_library(ltls SHARED skynet/lualib-src/ltls.c)
-    target_include_directories(ltls PRIVATE 3rd/openssl/include/)
-    target_link_directories(ltls PRIVATE 3rd/openssl/lib/mac/)
-    target_link_libraries(ltls ssl crypto)
-
     # 生成动态库 pb.so
     aux_source_directory(lualib-src/lua-protobuf PB_SRC)
     add_library(pb SHARED ${PB_SRC})
@@ -691,7 +673,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     target_include_directories(clonefunc PRIVATE skynet/skynet-src)
 
     set_target_properties(
-        lpeg sproto client md5 bson ltls
+        lpeg sproto client md5 bson
         pb lfs fmt yyjson buffer zset aoi navmesh
         math3d rp3d lsyslog miniz clonefunc
         PROPERTIES
