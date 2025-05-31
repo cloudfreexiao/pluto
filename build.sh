@@ -6,4 +6,4 @@ rm -rf "$BUILD_DIR" \
   && mkdir -p "$BUILD_DIR" \
   && cd "$BUILD_DIR" \
   && cmake .. \
-  && cmake --build .
+  && cmake --build . -j

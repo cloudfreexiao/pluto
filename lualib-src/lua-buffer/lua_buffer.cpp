@@ -42,7 +42,12 @@ static int size(lua_State* L) {
 template<typename T>
 static void pushinteger(lua_State* L, const char*& b, const char* e, bool little) {
     if ((size_t)(e - b) < sizeof(T))
-        luaL_error(L, "data string too short");
+        luaL_error(
+            L,
+            "data string too short, need %zu bytes, got %zu bytes",
+            sizeof(T),
+            (size_t)(e - b)
+        );
     T v = 0;
     memcpy(&v, b, sizeof(T));
     b += sizeof(T);
@@ -62,7 +67,7 @@ static int unpack(lua_State* L) {
         const char* opt = luaL_optlstring(L, 2, "", &opt_len);
         auto pos = static_cast<size_t>(luaL_optinteger(L, 3, 0));
         if (pos > buf->size())
-            return luaL_argerror(L, 3, "out of range");
+            return luaL_argerror(L, 3, "position out of range");
 
         const char* start = buf->data() + pos;
         const char* end = buf->data() + buf->size();
@@ -93,13 +98,17 @@ static int unpack(lua_State* L) {
                     lua_pushinteger(L, end - start);
                     break;
                 default:
-                    return luaL_error(L, "invalid format option '%c'", opt[i]);
+                    return luaL_error(
+                        L,
+                        "invalid format option '%c', valid options are '>','<','h','H','i','I','C'",
+                        opt[i]
+                    );
             }
         }
     } else {
         auto pos = static_cast<size_t>(luaL_optinteger(L, 2, 0));
         if (pos > buf->size())
-            return luaL_argerror(L, 2, "out of range");
+            return luaL_argerror(L, 2, "position out of range");
         auto count = static_cast<size_t>(luaL_optinteger(L, 3, -1));
         count = std::min(buf->size() - pos, count);
         lua_pushlstring(L, buf->data() + pos, count);
@@ -111,9 +120,9 @@ static int read(lua_State* L) {
     auto buf = get_pointer(L, 1);
     auto count = static_cast<size_t>(luaL_checkinteger(L, 2));
     if (count > buf->size())
-        return luaL_argerror(L, 2, "out of range");
+        return luaL_argerror(L, 2, "count exceeds buffer size");
     lua_pushlstring(L, buf->data(), count);
-    buf->consume(count);
+    buf->consume_unchecked(count);
     return 1;
 }
 
@@ -140,7 +149,7 @@ static void concat_table(lua_State* L, buffer* buf, int index, int depth) {
 
 static void concat_one(lua_State* L, buffer* b, int index, int depth) {
     if (depth > MAX_DEPTH) {
-        throw std::logic_error { "buffer.concat too depth table" };
+        throw std::logic_error { "buffer.concat too deep table (possibly circular reference)" };
     }
 
     int type = lua_type(L, index);
@@ -173,7 +182,7 @@ static void concat_one(lua_State* L, buffer* b, int index, int depth) {
             break;
         }
         default:
-            throw std::logic_error { std::string("buffer.concat_one unsupport type :")
+            throw std::logic_error { std::string("buffer.concat_one unsupported type: ")
                                      + lua_typename(L, type) };
     }
 }
@@ -214,14 +223,16 @@ static int seek(lua_State* L) {
         ((luaL_optinteger(L, 3, 1) == 1) ? buffer::seek_origin::Current : buffer::seek_origin::Begin
         );
     if (!buf->seek(pos, origin))
-        return luaL_error(L, "out off range");
+        return luaL_error(L, "position out of range, pos=%zu size=%zu", pos, buf->size());
     return 0;
 }
 
 static int commit(lua_State* L) {
     auto buf = get_pointer(L, 1);
     auto n = static_cast<size_t>(luaL_checkinteger(L, 2));
-    buf->commit(n);
+    if (!buf->commit(n)) {
+        return luaL_error(L, "Invalid commit size: %zu exceeds available capacity", n);
+    }
     return 0;
 }
 
@@ -229,7 +240,7 @@ static int prepare(lua_State* L) {
     auto buf = get_pointer(L, 1);
     auto n = static_cast<size_t>(luaL_checkinteger(L, 2));
     if (0 == n) {
-        return luaL_error(L, "Invalid buffer prepare param");
+        return luaL_error(L, "Invalid buffer prepare param: size must be greater than 0");
     }
     buf->prepare(n);
     return 0;
@@ -253,13 +264,13 @@ static int concat(lua_State* L) {
     if (0 == n) {
         return 0;
     }
-    auto buf = new buffer {};
-    buf->commit(BUFFER_OPTION_CHEAP_PREPEND);
+    auto buf = new buffer { 256 };
+    buf->commit_unchecked(BUFFER_OPTION_CHEAP_PREPEND);
     try {
         for (int i = 1; i <= n; i++) {
             concat_one(L, buf, i, 0);
         }
-        buf->seek(BUFFER_OPTION_CHEAP_PREPEND);
+        buf->consume_unchecked(BUFFER_OPTION_CHEAP_PREPEND);
         lua_pushlightuserdata(L, buf);
         return 1;
     } catch (const std::exception& e) {
@@ -271,8 +282,10 @@ static int concat(lua_State* L) {
 
 static int concat_string(lua_State* L) {
     int n = lua_gettop(L);
-    if (0 == n)
-        return 0;
+    if (0 == n) {
+        lua_pushliteral(L, "");
+        return 1;
+    }
 
     try {
         buffer buf;
@@ -347,7 +360,7 @@ static int append(lua_State* L) {
                 memcpy(ptr + offset, append->data(), append->size());
                 offset += append->size();
             }
-            buf->commit(offset);
+            buf->commit_unchecked(offset);
         }
         return 0;
     } catch (const std::exception& e) {
