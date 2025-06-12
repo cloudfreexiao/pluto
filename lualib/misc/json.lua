@@ -1,6 +1,6 @@
-local yyjson = require "yyjson"
+local core = require "json.core"
 
 return {
-    encode = yyjson.encode,
-    decode = yyjson.decode,
+    encode = core.encode,
+    decode = core.decode,
 }

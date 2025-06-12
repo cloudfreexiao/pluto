@@ -117,8 +117,8 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     aux_source_directory(lualib-src/lua-fmt FMT_SRC)
     add_library(fmt SHARED ${FMT_SRC})
 
-    # 生成动态库 yyjson.so
-    add_library(yyjson SHARED lualib-src/lua-yyjson/lua_yyjson.cpp)
+    # 生成动态库 json.so
+    add_library(json SHARED lualib-src/lua-json/lua_json.cpp)
 
     # 生成动态库 buffer.so
     aux_source_directory(lualib-src/lua-buffer BUFFER_SRC)
@@ -211,7 +211,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
 
     set_target_properties(
         lpeg sproto client md5 bson
-        pb lfs fmt yyjson buffer zset aoi navmesh 
+        pb lfs fmt json buffer zset aoi navmesh 
         math3d rp3d lsyslog miniz clonefunc
         PROPERTIES
         PREFIX ""
@@ -351,9 +351,9 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     add_library(fmt SHARED ${FMT_SRC})
     target_link_libraries(fmt liblua)
 
-    # 生成动态库 yyjson.so
-    add_library(yyjson SHARED lualib-src/lua-yyjson/lua_yyjson.cpp)
-    target_link_libraries(yyjson liblua)
+    # 生成动态库 json.so
+    add_library(json SHARED lualib-src/lua-json/lua_json.cpp)
+    target_link_libraries(json liblua)
 
     # 生成动态库 buffer.so
     aux_source_directory(lualib-src/lua-buffer BUFFER_SRC)
@@ -450,7 +450,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     # 设置动态库属性
     set_target_properties(
         lpeg sproto md5 bson skynetso
-        pb lfs fmt yyjson buffer zset aoi navmesh
+        pb lfs fmt json buffer zset aoi navmesh
         math3d rp3d miniz clonefunc
         PROPERTIES
         PREFIX ""
@@ -581,8 +581,8 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     aux_source_directory(lualib-src/lua-fmt FMT_SRC)
     add_library(fmt SHARED ${FMT_SRC})
 
-    # 生成动态库 yyjson.so
-    add_library(yyjson SHARED lualib-src/lua-yyjson/lua_yyjson.cpp)
+    # 生成动态库 json.so
+    add_library(json SHARED lualib-src/lua-json/lua_json.cpp)
 
     # 生成动态库 buffer.so
     aux_source_directory(lualib-src/lua-buffer BUFFER_SRC)
@@ -674,7 +674,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 
     set_target_properties(
         lpeg sproto client md5 bson
-        pb lfs fmt yyjson buffer zset aoi navmesh
+        pb lfs fmt json buffer zset aoi navmesh
         math3d rp3d lsyslog miniz clonefunc
         PROPERTIES
         PREFIX ""
