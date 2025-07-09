@@ -205,10 +205,15 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     add_library(clonefunc SHARED ${CLONEFUNC_SRC} ${LUA_LIB_SRC})
     target_include_directories(clonefunc PRIVATE skynet/skynet-src)
 
+    # 生成动态库 scram.so
+    aux_source_directory(lualib-src/lua-scram SCRAM_SRC)
+    add_library(scram SHARED ${SCRAM_SRC})
+    target_include_directories(scram PRIVATE lualib-src/common/crypto)
+
     set_target_properties(
         lpeg sproto client md5 bson
         pb lfs fmt json buffer zset aoi navmesh 
-        math3d rp3d lsyslog clonefunc
+        math3d rp3d lsyslog clonefunc scram
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
@@ -438,11 +443,17 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     add_library(clonefunc SHARED ${CLONEFUNC_SRC} ${LUA_LIB_SRC})
     target_include_directories(clonefunc PRIVATE skynet/skynet-src)
 
+    # 生成动态库 scram.so
+    aux_source_directory(lualib-src/lua-scram SCRAM_SRC)
+    add_library(scram SHARED ${SCRAM_SRC})
+    target_include_directories(scram PRIVATE lualib-src/common/crypto)
+    target_link_libraries(scram liblua)
+
     # 设置动态库属性
     set_target_properties(
         lpeg sproto md5 bson skynetso
         pb lfs fmt json buffer zset aoi navmesh
-        math3d rp3d clonefunc
+        math3d rp3d clonefunc scram
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
@@ -659,10 +670,15 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     add_library(clonefunc SHARED ${CLONEFUNC_SRC} ${LUA_LIB_SRC})
     target_include_directories(clonefunc PRIVATE skynet/skynet-src)
 
+    # 生成动态库 scram.so
+    aux_source_directory(lualib-src/lua-scram SCRAM_SRC)
+    add_library(scram SHARED ${SCRAM_SRC})
+    target_include_directories(scram PRIVATE lualib-src/common/crypto)
+
     set_target_properties(
         lpeg sproto client md5 bson
         pb lfs fmt json buffer zset aoi navmesh
-        math3d rp3d lsyslog clonefunc
+        math3d rp3d lsyslog clonefunc scram
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
