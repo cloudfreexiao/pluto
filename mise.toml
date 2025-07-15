@@ -1,0 +1,10 @@
+min_version = "2024.9.5"
+
+[tools]
+# Install CMake and make
+cmake = "latest"
+
+[tasks.build]
+description = "build the project"
+alias = "b"
+run = "sh build.sh"
