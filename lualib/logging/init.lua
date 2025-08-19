@@ -1,6 +1,0 @@
-
-local logger = {}
-
-return logger
-
-

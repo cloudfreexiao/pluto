@@ -196,10 +196,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
                 3rd/reactphysics3d/include/reactphysics3d/utils/
                 3rd/reactphysics3d/include/reactphysics3d/utils/quickhull/ )
 
-    # 生成动态库 lsyslog.so
-    aux_source_directory(lualib-src/luasyslog SYSLOG_SRC)
-    add_library(lsyslog SHARED ${SYSLOG_SRC})
-
     # 生成动态库 clonefunc.so
     aux_source_directory(lualib-src/lua-clonefunc CLONEFUNC_SRC)
     add_library(clonefunc SHARED ${CLONEFUNC_SRC} ${LUA_LIB_SRC})
@@ -208,7 +204,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     set_target_properties(
         lpeg sproto client md5 bson
         pb lfs fmt json buffer zset aoi navmesh 
-        math3d rp3d lsyslog clonefunc
+        math3d rp3d clonefunc
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
@@ -650,10 +646,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
                 3rd/reactphysics3d/include/reactphysics3d/utils/
                 3rd/reactphysics3d/include/reactphysics3d/utils/quickhull/ )
 
-    # 生成动态库 lsyslog.so
-    aux_source_directory(lualib-src/luasyslog SYSLOG_SRC)
-    add_library(lsyslog SHARED ${SYSLOG_SRC})
-
     # 生成动态库 clonefunc.so
     aux_source_directory(lualib-src/lua-clonefunc CLONEFUNC_SRC)
     add_library(clonefunc SHARED ${CLONEFUNC_SRC} ${LUA_LIB_SRC})
@@ -662,7 +654,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     set_target_properties(
         lpeg sproto client md5 bson
         pb lfs fmt json buffer zset aoi navmesh
-        math3d rp3d lsyslog clonefunc
+        math3d rp3d clonefunc
         PROPERTIES
         PREFIX ""
         SUFFIX .so )

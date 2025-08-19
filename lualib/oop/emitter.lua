@@ -11,11 +11,11 @@ local function tfind(tab, el)
 end
 
 
----@class EventEmitter @EventEmitter
----@field instance fun(...):EventEmitter
-local EventEmitter = class("EventEmitter"):include(singleton)
+---@class Emitter @Emitter
+---@field instance fun(...):Emitter
+local Emitter = class("Emitter"):include(singleton)
 
-function EventEmitter:initialize()
+function Emitter:initialize()
   self._on = {}
   self._once = {}
 end
@@ -24,7 +24,7 @@ end
 ---@param event string
 ---@param listener function
 ---@return function
-function EventEmitter:on(event, listener)
+function Emitter:on(event, listener)
   self._on[event] = self._on[event] or {}
   table.insert(self._on[event], listener)
   return listener
@@ -34,7 +34,7 @@ end
 ---@param event string
 ---@param listener function
 ---@return function
-function EventEmitter:once(event, listener)
+function Emitter:once(event, listener)
   self._once[event] = listener
   return self:on(event, listener)
 end
@@ -42,7 +42,7 @@ end
 ---@function off
 ---@param event nil|string
 ---@param listener nil|function
-function EventEmitter:off(event, listener)
+function Emitter:off(event, listener)
   if event then
     -- clear from "once"
     self._once[event] = nil
@@ -60,11 +60,11 @@ end
 
 ---@function listeners
 ---@param event string
-function EventEmitter:listeners(event)
+function Emitter:listeners(event)
   return self._on[event] or {}
 end
 
-function EventEmitter:emit(event, ...)
+function Emitter:emit(event, ...)
   -- copy list before iterating over it
   -- (make sure all previously registered callbacks are called, even if some are removed in-between)
   local listeners = {}
@@ -85,4 +85,4 @@ function EventEmitter:emit(event, ...)
   end
 end
 
-return EventEmitter
+return Emitter
