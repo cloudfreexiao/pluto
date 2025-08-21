@@ -1,68 +1,8 @@
 services:
-  redis:
-    image: docker.io/bitnami/redis:7.4
-    container_name: redis
-    restart: always
-    environment:
-      # ALLOW_EMPTY_PASSWORD is recommended only for development.
-      # REDIS_DISABLE_COMMANDS: FLUSHDB,FLUSHALL
-      ALLOW_EMPTY_PASSWORD: yes
-    ports:
-      - 9501:6379
-    volumes:
-      - redis_data:/bitnami/redis/data
-    networks:
-      - pluto
-
-  mongo:
-    image: docker.io/bitnami/mongodb:8.0
-    container_name: mongo
-    restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: pluto
-      MONGO_INITDB_ROOT_PASSWORD: pluto
-      MONGO_INITDB_DATABASE: pluto
-    ports:
-      - 9502:27017
-    volumes:
-      - mongo_data:/bitnami/mongodb
-    networks:
-      - pluto
-
-  etcd:
-    image: docker.io/bitnami/etcd:3.5
-    container_name: etcd
-    restart: always
-    environment:
-      ALLOW_NONE_AUTHENTICATION: yes
-      ETCD_ADVERTISE_CLIENT_URLS: http://etcd:2379
-    ports:
-      - 9503:2379
-      - 9504:2380
-    volumes:
-      - etcd_data:/bitnami/etcd
-    networks:
-      - pluto
-
   pluto:
     build:
       context: .
       dockerfile: './Dockerfile'
     container_name: "pluto"
-    depends_on:
-      - redis
-      - mongo
-      - etcd
     command: tail -f /dev/null
     restart: always
-    networks:
-      - pluto
-
-volumes:
-  redis_data: {}
-  mongo_data: {}
-  etcd_data: {}
-
-networks:
-  pluto:
-    driver: bridge
