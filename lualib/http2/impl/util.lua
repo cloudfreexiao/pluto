@@ -1,0 +1,92 @@
+local bit = require "http2.impl.bit"
+
+local pairs = pairs
+local bor = bit.bor
+local band = bit.band
+local bnot = bit.bnot
+local blshift = bit.lshift
+local brshift = bit.rshift
+local char = string.char
+local type = type
+
+local debug_log
+
+local _M = { _VERSION = "0.1" }
+
+
+_M.debug_log = debug_log
+
+
+local ok, new_tab = pcall(require, "table.new")
+if not ok then
+    new_tab = function(a, b) return {} end
+end
+_M.new_tab = new_tab
+
+local clear_tab
+ok, clear_tab = pcall(require, "table.clear")
+if not ok then
+    clear_tab = function(tab)
+        for k, _ in pairs(tab) do
+            tab[k] = nil
+        end
+    end
+end
+_M.clear_tab = clear_tab
+
+
+function _M.align(value, base)
+    return band(value + base - 1, bnot(base - 1))
+end
+
+function _M.pack_u16(u, dst)
+    local len = #dst
+    dst[len + 1] = char(band(brshift(u, 8), 0xff))
+    dst[len + 2] = char(band(u, 0xff))
+end
+
+function _M.unpack_u16(b1, b2)
+    return bor(blshift(b1, 8), b2)
+end
+
+function _M.pack_u32(u, dst)
+    local len = #dst
+    dst[len + 1] = char(band(brshift(u, 24), 0xff))
+    dst[len + 2] = char(band(brshift(u, 16), 0xff))
+    dst[len + 3] = char(band(brshift(u, 8), 0xff))
+    dst[len + 4] = char(band(u, 0xff))
+end
+
+function _M.unpack_u32(b1, b2, b3, b4)
+    local mid1 = bor(blshift(b1, 8), b2)
+    local mid2 = bor(blshift(b3, 8), b4)
+    return bor(blshift(mid1, 16), mid2)
+end
+
+function _M.is_num(num)
+    return type(num) == "number"
+end
+
+function _M.is_tab(tab)
+    return type(tab) == "table"
+end
+
+function _M.is_func(func)
+    return type(func) == "function"
+end
+
+function _M.is_str(str)
+    return type(str) == "string"
+end
+
+-- TODO recycle the buffer struct if necessary
+function _M.new_buffer(data, pos, last)
+    return {
+        data = data,
+        pos = pos,
+        last = last,
+        next = nil,
+    }
+end
+
+return _M
