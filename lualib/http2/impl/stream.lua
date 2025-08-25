@@ -27,8 +27,6 @@ local STATE_RESERVED_REMOTE = 7
 local MAX_WINDOW = 0x7fffffff
 
 local _M = {
-    _VERSION = "0.1",
-
     MAX_WEIGHT = 256,
     DEFAULT_WEIGHT = 16,
 }
@@ -86,7 +84,6 @@ function _M:set_dependency(depend, excl)
         stream.rel_weight = stream.weight / max_weight
         stream.rank = 1
         child = depend.child
-
     else
         -- check whether stream is an ancestor of depend
         while true do
@@ -178,16 +175,15 @@ function _M:set_dependency(depend, excl)
     children_update(stream)
 end
 
-
 -- serialize headers and create a headers frame,
 -- note this function does not check the HTTP protocol semantics,
 -- callers should check this in the higher land.
 function _M:submit_headers(headers, end_stream, priority, pad)
     local state = self.state
     if state ~= STATE_IDLE
-       and state ~= STATE_OPEN
-       and state ~= STATE_RESERVED_LOCAL
-       and state ~= STATE_HALF_CLOSED_REMOTE
+        and state ~= STATE_OPEN
+        and state ~= STATE_RESERVED_LOCAL
+        and state ~= STATE_HALF_CLOSED_REMOTE
     then
         return nil, "invalid stream state"
     end
@@ -265,7 +261,7 @@ function _M:submit_headers(headers, end_stream, priority, pad)
     end
 
     local frame, err = h2_frame.headers.new(payload, priority, pad,
-                                            end_stream, not continue, sid)
+        end_stream, not continue, sid)
     if not frame then
         return nil, err
     end
@@ -296,7 +292,6 @@ function _M:submit_headers(headers, end_stream, priority, pad)
     -- until the frame was really sent.
     if state == STATE_IDLE then
         self.state = end_stream and STATE_HALF_CLOSED_LOCAL or STATE_OPEN
-
     elseif state == STATE_RESERVED_LOCAL then
         self.state = end_stream and STATE_CLOSED or STATE_HALF_CLOSED_REMOTE
     end
@@ -304,7 +299,6 @@ function _M:submit_headers(headers, end_stream, priority, pad)
     local peer_state = self.peer_state
     if peer_state == STATE_IDLE then
         self.peer_state = end_stream and STATE_HALF_CLOSED_REMOTE or STATE_OPEN
-
     elseif peer_state == STATE_RESERVED_REMOTE then
         self.peer_state = end_stream and STATE_CLOSED or STATE_HALF_CLOSED_LOCAL
     end
@@ -313,7 +307,6 @@ function _M:submit_headers(headers, end_stream, priority, pad)
 
     return true
 end
-
 
 function _M:submit_data(data, pad, last)
     local state = self.state
@@ -363,7 +356,6 @@ function _M:submit_data(data, pad, last)
     return true
 end
 
-
 function _M:rst(code)
     code = code or h2_error.protocol.NO_ERROR
     local state = self.state
@@ -386,7 +378,6 @@ function _M:rst(code)
     session.closed_streams = session.closed_streams + 1
 end
 
-
 function _M:submit_window_update(incr)
     local state = self.state
     if state == STATE_IDLE or state == STATE_CLOSED then
@@ -403,7 +394,6 @@ function _M:submit_window_update(incr)
     self.session:frame_queue(frame)
     return true
 end
-
 
 function _M.new(sid, weight, session)
     weight = weight or _M.DEFAULT_WEIGHT
@@ -439,7 +429,6 @@ function _M.new(sid, weight, session)
         session.idle_streams = session.idle_streams + 1
 
         stream_map[sid] = stream
-
     else
         -- since the stream dependencies, the stream maybe created early
         stream.init_window = init_window
@@ -457,7 +446,6 @@ function _M.new(sid, weight, session)
 
     return setmetatable(stream, mt)
 end
-
 
 function _M.new_root(session)
     -- XXX this is a work around way to solve
@@ -477,7 +465,6 @@ function _M.new_root(session)
 
     return setmetatable(root, mt)
 end
-
 
 _M.STATE_IDLE = STATE_IDLE
 _M.STATE_OPEN = STATE_OPEN

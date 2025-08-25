@@ -21,7 +21,7 @@ local HTTP2_PREFACE = "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n"
 
 local send_buffer
 local send_buffer_size = 0
-local _M = { _VERSION = "0.1" }
+local _M = {}
 local mt = { __index = _M }
 
 

@@ -1,3 +1,5 @@
+-- https://github.com/tokers/lua-resty-http2
+
 local h2_protocol = require "http2.impl.protocol"
 local h2_frame = require "http2.impl.frame"
 local h2_error = require "http2.impl.error"
@@ -13,7 +15,8 @@ local min = math.min
 local pairs = pairs
 local setmetatable = setmetatable
 
-local _M = { _VERSION = "0.1" }
+
+local _M = {}
 local mt = { __index = _M }
 local session_pool = new_tab(0, 4)
 
@@ -155,8 +158,8 @@ function _M.new(opts)
     local key = opts.key
 
     if max_frame_size and
-       (max_frame_size > h2_frame.MAX_FRAME_SIZE or
-        max_frame_size < h2_frame.DEFAULT_FRAME_SIZE)
+        (max_frame_size > h2_frame.MAX_FRAME_SIZE or
+            max_frame_size < h2_frame.DEFAULT_FRAME_SIZE)
     then
         return nil, "incorrect max_frame_size value"
     end
@@ -172,11 +175,10 @@ function _M.new(opts)
         if not ok then
             return nil, err
         end
-
     else
         session, err = h2_protocol.session(recv, send, ctx, preread_size,
-                                           max_concurrent_stream,
-                                           max_frame_size)
+            max_concurrent_stream,
+            max_frame_size)
         if not session then
             return nil, err
         end
@@ -194,25 +196,23 @@ function _M.new(opts)
     return setmetatable(client, mt)
 end
 
-
 function _M:keepalive(key)
     local session = self.session
     if session.goaway_sent or session.goaway_received or session.fatal then
-        print("Debug error : session.goaway_sent or session.goaway_received or session.fatal = " .. tostring(session.goaway_sent) .. " " ..tostring(session.goaway_received) .. "  " .. tostring(session.fatal) )
+        print("Debug error : session.goaway_sent or session.goaway_received or session.fatal = " ..
+            tostring(session.goaway_sent) .. " " .. tostring(session.goaway_received) .. "  " .. tostring(session.fatal))
         return
     end
-    print( "keepalive set OK")
+    print("keepalive set OK")
     session:detach()
     session_pool[key] = session
 end
-
 
 function _M:close(code)
     local session = self.session
     session:close(code)
     return session:flush_queue()
 end
-
 
 function _M:acknowledge_settings()
     local session = self.session
@@ -225,7 +225,6 @@ function _M:acknowledge_settings()
 
     return true
 end
-
 
 function _M:send_request(headers, body)
     local session = self.session
@@ -258,7 +257,7 @@ function _M:send_request(headers, body)
             part, last, err = get_data(size)
             if not part then
                 debug_log("connection will be closed since ",
-                          "DATA frame cannot be generated correctly")
+                    "DATA frame cannot be generated correctly")
 
                 session:close(h2_error.INTERNAL_ERROR)
                 ok, flush_err = session:flush_queue()
@@ -289,7 +288,6 @@ function _M:send_request(headers, body)
     return stream
 end
 
-
 function _M:read_headers(stream)
     local session = stream.session
 
@@ -309,7 +307,6 @@ function _M:read_headers(stream)
 
     return headers
 end
-
 
 function _M:read_body(stream)
     if stream.done then
@@ -337,9 +334,8 @@ function _M:read_body(stream)
     return body
 end
 
-
 function _M:request(headers, body, on_headers_reach, on_data_reach,
-    on_trailers_reach)
+                    on_trailers_reach)
     local ack, err = self:acknowledge_settings()
     if not ack then
         return nil, err
@@ -419,6 +415,5 @@ function _M:request(headers, body, on_headers_reach, on_data_reach,
 
     return true
 end
-
 
 return _M

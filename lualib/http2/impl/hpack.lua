@@ -21,7 +21,7 @@ local clear_tab = util.clear_tab
 local debug_log = util.debug_log
 local is_str = util.is_str
 
-local _M = { _VERSION = "0.1" }
+local _M = {}
 local mt = { __index = _M }
 
 local MAX_TABLE_SIZE = 4096
@@ -38,67 +38,67 @@ local huff_data
 local huff_data_len = 0
 
 local hpack_static_table = {
-    { name = ":authority", value = "" },
-    { name = ":method", value = "GET" },
-    { name = ":method", value = "POST" },
-    { name = ":path", value = "/" },
-    { name = ":path", value = "/index.html" },
-    { name = ":scheme", value = "http" },
-    { name = ":scheme", value = "https" },
-    { name = ":status", value = "200" },
-    { name = ":status", value = "204" },
-    { name = ":status", value = "206" },
-    { name = ":status", value = "304" },
-    { name = ":status", value = "400" },
-    { name = ":status", value = "404" },
-    { name = ":status", value = "500" },
-    { name = "accept-charset", value = "" },
-    { name = "accept-encoding", value = "gzip, deflate" },
-    { name = "accept-language", value = "" },
-    { name = "accept-ranges", value = "" },
-    { name = "accept", value = "" },
+    { name = ":authority",                  value = "" },
+    { name = ":method",                     value = "GET" },
+    { name = ":method",                     value = "POST" },
+    { name = ":path",                       value = "/" },
+    { name = ":path",                       value = "/index.html" },
+    { name = ":scheme",                     value = "http" },
+    { name = ":scheme",                     value = "https" },
+    { name = ":status",                     value = "200" },
+    { name = ":status",                     value = "204" },
+    { name = ":status",                     value = "206" },
+    { name = ":status",                     value = "304" },
+    { name = ":status",                     value = "400" },
+    { name = ":status",                     value = "404" },
+    { name = ":status",                     value = "500" },
+    { name = "accept-charset",              value = "" },
+    { name = "accept-encoding",             value = "gzip, deflate" },
+    { name = "accept-language",             value = "" },
+    { name = "accept-ranges",               value = "" },
+    { name = "accept",                      value = "" },
     { name = "access-control-allow-origin", value = "" },
-    { name = "age", value = "" },
-    { name = "allow", value = "" },
-    { name = "authorization",  value = "" },
-    { name = "cache-control",  value = "" },
-    { name = "content-disposition", value = "" },
-    { name = "content-encoding", value = "" },
-    { name = "content-language", value = "" },
-    { name = "content-length", value = "" },
-    { name = "content-location", value = "" },
-    { name = "content-range", value = "" },
-    { name = "content-type", value = "" },
-    { name = "cookie", value = "" },
-    { name = "date", value = "" },
-    { name = "etag", value = "" },
-    { name = "expect", value = "" },
-    { name = "expires", value = "" },
-    { name = "from", value = "" },
-    { name = "host", value = "" },
-    { name = "if-match", value = "" },
-    { name = "if-modified-since", value = "" },
-    { name = "if-none-match", value = "" },
-    { name = "if-range", value = "" },
-    { name =  "if-unmodified-since", value = ""  },
-    { name = "last-modified", value = "" },
-    { name = "link", value = "" },
-    { name = "location", value = "" },
-    { name = "max-forwards", value = "" },
-    { name = "proxy-authenticate", value = "" },
-    { name = "proxy-authorization", value = "" },
-    { name = "range", value = "" },
-    { name = "referer", value = "" },
-    { name = "refresh", value = "" },
-    { name = "retry-after", value = "" },
-    { name = "server", value = "" },
-    { name = "set-cookie", value = "" },
-    { name = "strict-transport-security", value = "" },
-    { name = "transfer-encoding", value = "" },
-    { name = "user-agent", value = "" },
-    { name = "vary", value = "" },
-    { name = "via", value = "" },
-    { name = "www-authenticate", value = "" },
+    { name = "age",                         value = "" },
+    { name = "allow",                       value = "" },
+    { name = "authorization",               value = "" },
+    { name = "cache-control",               value = "" },
+    { name = "content-disposition",         value = "" },
+    { name = "content-encoding",            value = "" },
+    { name = "content-language",            value = "" },
+    { name = "content-length",              value = "" },
+    { name = "content-location",            value = "" },
+    { name = "content-range",               value = "" },
+    { name = "content-type",                value = "" },
+    { name = "cookie",                      value = "" },
+    { name = "date",                        value = "" },
+    { name = "etag",                        value = "" },
+    { name = "expect",                      value = "" },
+    { name = "expires",                     value = "" },
+    { name = "from",                        value = "" },
+    { name = "host",                        value = "" },
+    { name = "if-match",                    value = "" },
+    { name = "if-modified-since",           value = "" },
+    { name = "if-none-match",               value = "" },
+    { name = "if-range",                    value = "" },
+    { name = "if-unmodified-since",         value = "" },
+    { name = "last-modified",               value = "" },
+    { name = "link",                        value = "" },
+    { name = "location",                    value = "" },
+    { name = "max-forwards",                value = "" },
+    { name = "proxy-authenticate",          value = "" },
+    { name = "proxy-authorization",         value = "" },
+    { name = "range",                       value = "" },
+    { name = "referer",                     value = "" },
+    { name = "refresh",                     value = "" },
+    { name = "retry-after",                 value = "" },
+    { name = "server",                      value = "" },
+    { name = "set-cookie",                  value = "" },
+    { name = "strict-transport-security",   value = "" },
+    { name = "transfer-encoding",           value = "" },
+    { name = "user-agent",                  value = "" },
+    { name = "vary",                        value = "" },
+    { name = "via",                         value = "" },
+    { name = "www-authenticate",            value = "" },
 }
 
 -- use two pointers mimic the dynamic table's borders,
@@ -377,7 +377,7 @@ function _M.new(size)
         entries = new_tab(ENTRY_SLOTS, 0),
         slots = ENTRY_SLOTS,
         front = 1, -- pop from the front
-        back = 0, -- push from the back
+        back = 0,  -- push from the back
     }
 
     return setmetatable({
@@ -389,7 +389,6 @@ function _M.new(size)
         decode_state = huffdec.new_state(),
     }, mt)
 end
-
 
 function _M:insert_entry(header_name, header_value)
     local dynamic = self.dynamic
@@ -426,7 +425,6 @@ function _M:insert_entry(header_name, header_value)
             for i = 1, slots do
                 new_entries[i] = entries[i]
             end
-
         else
             for i = front, slots do
                 new_entries[i - front + 1] = entries[i]
@@ -445,7 +443,7 @@ function _M:insert_entry(header_name, header_value)
         dynamic.slots = slots + 64
     end
 
-::insert::
+    ::insert::
 
     back = back + 1
     if back > dynamic.slots then
@@ -457,7 +455,6 @@ function _M:insert_entry(header_name, header_value)
 
     return true
 end
-
 
 function _M:resize(new_size)
     if new_size > MAX_TABLE_SIZE then
@@ -487,7 +484,6 @@ function _M:resize(new_size)
     return true
 end
 
-
 function _M:decode(dst)
     local buffer = self.cached
     if not buffer then
@@ -513,19 +509,15 @@ function _M:decode(dst)
         if ch >= 128 then -- indexed header field
             prefix = 127
             index_type = HPACK_INDEXED
-
         elseif ch >= 64 then -- literal header field with incremental indexing
             prefix = 63
             index_type = HPACK_INCR_INDEXING
-
         elseif ch >= 32 then -- dynamic table size update
             prefix = 31
             size_update = true
-
         elseif ch >= 16 then -- literal header field never indexed
             prefix = 15
             index_type = HPACK_NEVER_INDEXED
-
         else
             prefix = 15
             index_type = HPACK_WITHOUT_INDEXING
@@ -543,14 +535,12 @@ function _M:decode(dst)
             end
 
             append_header(dst, entry.name, entry.value)
-
         elseif size_update then
             size_update = false
 
             if not self:resize(value) then
                 return nil, h2_error.COMPRESSION_ERROR
             end
-
         else
             local header_name
             local header_value
@@ -562,7 +552,6 @@ function _M:decode(dst)
                 end
 
                 header_name = entry.name
-
             else
                 header_name = parse_value(self)
                 if not header_name then
@@ -585,7 +574,6 @@ function _M:decode(dst)
 
     return true
 end
-
 
 function _M:get_indexed_header(raw_index)
     if raw_index <= 0 then
@@ -632,7 +620,6 @@ function _M:get_indexed_header(raw_index)
     return dynamic.entries[slots - (index - back) + 1]
 end
 
-
 -- literal header field with incremental indexing
 function _M.encode(src, dst, lower)
     local tmp = huffenc.encode(src, lower)
@@ -651,16 +638,13 @@ function _M.encode(src, dst, lower)
     end
 end
 
-
 function _M.indexed(index)
     return char(128 + index)
 end
 
-
 function _M.incr_indexed(index)
     return char(64 + index)
 end
-
 
 _M.MAX_TABLE_SIZE = MAX_TABLE_SIZE
 
@@ -693,4 +677,3 @@ _M.COMMON_REQUEST_HEADERS_INDEX = {
 
 
 return _M
-

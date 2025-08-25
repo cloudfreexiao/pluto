@@ -48,7 +48,6 @@ local SETTINGS_MAX_FRAME_SIZE = 0x5
 
 
 local _M = {
-    _VERSION = "0.1",
 }
 
 local header = {}        -- frame header

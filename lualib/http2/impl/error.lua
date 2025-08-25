@@ -1,4 +1,4 @@
-local _M = { _VERSION = "0.1" }
+local _M = {}
 
 local NO_ERROR = 0x0
 local PROTOCOL_ERROR = 0x1

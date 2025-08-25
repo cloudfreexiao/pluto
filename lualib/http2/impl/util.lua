@@ -1,5 +1,7 @@
 local bit = require "http2.impl.bit"
 
+local skynet = require "skynet"
+
 local pairs = pairs
 local bor = bit.bor
 local band = bit.band
@@ -9,11 +11,11 @@ local brshift = bit.rshift
 local char = string.char
 local type = type
 
-local debug_log
+local _M = {}
 
-local _M = { _VERSION = "0.1" }
-
-
+local debug_log = function(...)
+    skynet.error(...)
+end
 _M.debug_log = debug_log
 
 
