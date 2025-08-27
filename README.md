@@ -36,13 +36,11 @@ git clone --recurse-submodules git@github.com:cloudfreexiao/pluto.git
 
 ## 参考
 
-- [wiki](https://deepwiki.com/cloudfreexiao/pluto)
 - [skynet-cmake](https://github.com/hanxi/skynet-cmake)
 - [moon](https://github.com/sniper00/moon)
+- [wiki](https://deepwiki.com/cloudfreexiao/pluto)
 
 ## 工具
 
 - [gmoon](https://github.com/cloudfreexiao/gmoon)
 - [goscon](https://github.com/cloudfreexiao/goscon)
-- [ExportSceneToObj](https://github.com/monitor1394/ExportSceneToObj)
-- [lua-gdb](https://github.com/xjdrew/lua-gdb)
