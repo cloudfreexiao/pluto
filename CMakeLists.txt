@@ -153,49 +153,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     target_include_directories(math3d PRIVATE 3rd/glm/include/)
     target_compile_definitions(math3d PUBLIC -DGLM_ENABLE_EXPERIMENTAL -DGLM_FORCE_QUAT_DATA_XYZW)
 
-    # 生成动态库 rp3d.so
-    aux_source_directory(lualib-src/lua-rp3d RP3D_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/body/ RP3D_body_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/collision/ RP3D_collision_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/collision/broadphase/ RP3D_collision_broadphase_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/collision/narrowphase/ RP3D_collision_narrowphase_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/collision/narrowphase/GJK/ RP3D_collision_narrowphase_GJK_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/collision/narrowphase/SAT/ RP3D_collision_narrowphase_SAT_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/collision/shapes/ RP3D_collision_shapes_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/components/ RP3D_components_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/constraint/ RP3D_constraint_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/engine/ RP3D_engine_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/mathematics/ RP3D_mathematics_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/memory/ RP3D_memory_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/systems/ RP3D_systems_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/utils/ RP3D_utils_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/utils/quickhull/ RP3D_utils_quickhull_SRC)
-    add_library(rp3d SHARED ${RP3D_SRC} ${RP3D_body_SRC} 
-                ${RP3D_collision_SRC}  ${RP3D_collision_broadphase_SRC}
-                ${RP3D_collision_narrowphase_SRC} ${RP3D_collision_narrowphase_GJK_SRC}
-                ${RP3D_collision_narrowphase_SAT_SRC} ${RP3D_collision_shapes_SRC}
-                ${RP3D_components_SRC} ${RP3D_constraint_SRC}
-                ${RP3D_engine_SRC} ${RP3D_mathematics_SRC}
-                ${RP3D_memory_SRC} ${RP3D_systems_SRC}
-                ${RP3D_utils_SRC} ${RP3D_utils_quickhull_SRC} )
-    target_include_directories(rp3d PRIVATE 3rd/reactphysics3d/include/
-                3rd/reactphysics3d/include/reactphysics3d/body/
-                3rd/reactphysics3d/include/reactphysics3d/collision/
-                3rd/reactphysics3d/include/reactphysics3d/collision/broadphase/
-                3rd/reactphysics3d/include/reactphysics3d/collision/narrowphase/
-                3rd/reactphysics3d/include/reactphysics3d/collision/narrowphase/GJK/
-                3rd/reactphysics3d/include/reactphysics3d/collision/narrowphase/SAT/
-                3rd/reactphysics3d/include/reactphysics3d/collision/shapes/
-                3rd/reactphysics3d/include/reactphysics3d/components/
-                3rd/reactphysics3d/include/reactphysics3d/constraint/
-                3rd/reactphysics3d/include/reactphysics3d/containers/
-                3rd/reactphysics3d/include/reactphysics3d/engine/
-                3rd/reactphysics3d/include/reactphysics3d/mathematics/
-                3rd/reactphysics3d/include/reactphysics3d/memory/
-                3rd/reactphysics3d/include/reactphysics3d/systems/
-                3rd/reactphysics3d/include/reactphysics3d/utils/
-                3rd/reactphysics3d/include/reactphysics3d/utils/quickhull/ )
-
     # 生成动态库 clonefunc.so
     aux_source_directory(lualib-src/lua-clonefunc CLONEFUNC_SRC)
     add_library(clonefunc SHARED ${CLONEFUNC_SRC} ${LUA_LIB_SRC})
@@ -203,8 +160,11 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
 
     set_target_properties(
         lpeg sproto client md5 bson
-        pb lfs fmt json buffer zset aoi navmesh 
-        math3d rp3d clonefunc
+        pb lfs 
+        fmt json 
+        buffer zset 
+        aoi navmesh 
+        math3d clonefunc
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
@@ -385,50 +345,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     target_compile_definitions(math3d PUBLIC -DGLM_ENABLE_EXPERIMENTAL -DGLM_FORCE_QUAT_DATA_XYZW)
     target_link_libraries(math3d liblua)
 
-    # 生成动态库 rp3d.so
-    aux_source_directory(lualib-src/lua-rp3d RP3D_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/body/ RP3D_body_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/collision/ RP3D_collision_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/collision/broadphase/ RP3D_collision_broadphase_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/collision/narrowphase/ RP3D_collision_narrowphase_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/collision/narrowphase/GJK/ RP3D_collision_narrowphase_GJK_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/collision/narrowphase/SAT/ RP3D_collision_narrowphase_SAT_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/collision/shapes/ RP3D_collision_shapes_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/components/ RP3D_components_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/constraint/ RP3D_constraint_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/engine/ RP3D_engine_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/mathematics/ RP3D_mathematics_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/memory/ RP3D_memory_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/systems/ RP3D_systems_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/utils/ RP3D_utils_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/utils/quickhull/ RP3D_utils_quickhull_SRC)
-    add_library(rp3d SHARED ${RP3D_SRC} ${RP3D_body_SRC} 
-                ${RP3D_collision_SRC}  ${RP3D_collision_broadphase_SRC}
-                ${RP3D_collision_narrowphase_SRC} ${RP3D_collision_narrowphase_GJK_SRC}
-                ${RP3D_collision_narrowphase_SAT_SRC} ${RP3D_collision_shapes_SRC}
-                ${RP3D_components_SRC} ${RP3D_constraint_SRC}
-                ${RP3D_engine_SRC} ${RP3D_mathematics_SRC}
-                ${RP3D_memory_SRC} ${RP3D_systems_SRC}
-                ${RP3D_utils_SRC} ${RP3D_utils_quickhull_SRC} )
-    target_include_directories(rp3d PRIVATE 3rd/reactphysics3d/include/
-                3rd/reactphysics3d/include/reactphysics3d/body/
-                3rd/reactphysics3d/include/reactphysics3d/collision/
-                3rd/reactphysics3d/include/reactphysics3d/collision/broadphase/
-                3rd/reactphysics3d/include/reactphysics3d/collision/narrowphase/
-                3rd/reactphysics3d/include/reactphysics3d/collision/narrowphase/GJK/
-                3rd/reactphysics3d/include/reactphysics3d/collision/narrowphase/SAT/
-                3rd/reactphysics3d/include/reactphysics3d/collision/shapes/
-                3rd/reactphysics3d/include/reactphysics3d/components/
-                3rd/reactphysics3d/include/reactphysics3d/constraint/
-                3rd/reactphysics3d/include/reactphysics3d/containers/
-                3rd/reactphysics3d/include/reactphysics3d/engine/
-                3rd/reactphysics3d/include/reactphysics3d/mathematics/
-                3rd/reactphysics3d/include/reactphysics3d/memory/
-                3rd/reactphysics3d/include/reactphysics3d/systems/
-                3rd/reactphysics3d/include/reactphysics3d/utils/
-                3rd/reactphysics3d/include/reactphysics3d/utils/quickhull/ )
-    target_link_libraries(rp3d liblua)
-
     # 生成动态库 clonefunc.so
     aux_source_directory(lualib-src/lua-clonefunc CLONEFUNC_SRC)
     add_library(clonefunc SHARED ${CLONEFUNC_SRC} ${LUA_LIB_SRC})
@@ -437,8 +353,11 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     # 设置动态库属性
     set_target_properties(
         lpeg sproto md5 bson skynetso
-        pb lfs fmt json buffer zset aoi navmesh
-        math3d rp3d clonefunc
+        pb lfs 
+        fmt json 
+        buffer zset 
+        aoi navmesh
+        math3d clonefunc
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
@@ -603,49 +522,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     target_include_directories(math3d PRIVATE 3rd/glm/include/)
     target_compile_definitions(math3d PRIVATE -DGLM_ENABLE_EXPERIMENTAL -DGLM_FORCE_QUAT_DATA_XYZW)
 
-    # 生成动态库 rp3d.so
-    aux_source_directory(lualib-src/lua-rp3d RP3D_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/body/ RP3D_body_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/collision/ RP3D_collision_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/collision/broadphase/ RP3D_collision_broadphase_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/collision/narrowphase/ RP3D_collision_narrowphase_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/collision/narrowphase/GJK/ RP3D_collision_narrowphase_GJK_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/collision/narrowphase/SAT/ RP3D_collision_narrowphase_SAT_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/collision/shapes/ RP3D_collision_shapes_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/components/ RP3D_components_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/constraint/ RP3D_constraint_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/engine/ RP3D_engine_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/mathematics/ RP3D_mathematics_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/memory/ RP3D_memory_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/systems/ RP3D_systems_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/utils/ RP3D_utils_SRC)
-    aux_source_directory(3rd/reactphysics3d/src/utils/quickhull/ RP3D_utils_quickhull_SRC)
-    add_library(rp3d SHARED ${RP3D_SRC} ${RP3D_body_SRC} 
-                ${RP3D_collision_SRC}  ${RP3D_collision_broadphase_SRC}
-                ${RP3D_collision_narrowphase_SRC} ${RP3D_collision_narrowphase_GJK_SRC}
-                ${RP3D_collision_narrowphase_SAT_SRC} ${RP3D_collision_shapes_SRC}
-                ${RP3D_components_SRC} ${RP3D_constraint_SRC}
-                ${RP3D_engine_SRC} ${RP3D_mathematics_SRC}
-                ${RP3D_memory_SRC} ${RP3D_systems_SRC}
-                ${RP3D_utils_SRC} ${RP3D_utils_quickhull_SRC} )
-    target_include_directories(rp3d PRIVATE 3rd/reactphysics3d/include/
-                3rd/reactphysics3d/include/reactphysics3d/body/
-                3rd/reactphysics3d/include/reactphysics3d/collision/
-                3rd/reactphysics3d/include/reactphysics3d/collision/broadphase/
-                3rd/reactphysics3d/include/reactphysics3d/collision/narrowphase/
-                3rd/reactphysics3d/include/reactphysics3d/collision/narrowphase/GJK/
-                3rd/reactphysics3d/include/reactphysics3d/collision/narrowphase/SAT/
-                3rd/reactphysics3d/include/reactphysics3d/collision/shapes/
-                3rd/reactphysics3d/include/reactphysics3d/components/
-                3rd/reactphysics3d/include/reactphysics3d/constraint/
-                3rd/reactphysics3d/include/reactphysics3d/containers/
-                3rd/reactphysics3d/include/reactphysics3d/engine/
-                3rd/reactphysics3d/include/reactphysics3d/mathematics/
-                3rd/reactphysics3d/include/reactphysics3d/memory/
-                3rd/reactphysics3d/include/reactphysics3d/systems/
-                3rd/reactphysics3d/include/reactphysics3d/utils/
-                3rd/reactphysics3d/include/reactphysics3d/utils/quickhull/ )
-
     # 生成动态库 clonefunc.so
     aux_source_directory(lualib-src/lua-clonefunc CLONEFUNC_SRC)
     add_library(clonefunc SHARED ${CLONEFUNC_SRC} ${LUA_LIB_SRC})
@@ -653,8 +529,11 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 
     set_target_properties(
         lpeg sproto client md5 bson
-        pb lfs fmt json buffer zset aoi navmesh
-        math3d rp3d clonefunc
+        pb lfs 
+        fmt json 
+        buffer zset 
+        aoi navmesh
+        math3d clonefunc
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
