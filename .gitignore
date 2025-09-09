@@ -2,3 +2,4 @@
 ._*
 .git
 build
+.cache
