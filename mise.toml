@@ -1,7 +1,7 @@
-min_version = "2024.9.5"
+min_version = "2025.9.6"
 
 [tools]
-# Install CMake and make
+# Install CMake
 cmake = "latest"
 
 [tasks.build]
