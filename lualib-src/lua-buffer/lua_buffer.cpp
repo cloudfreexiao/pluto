@@ -394,7 +394,7 @@ static int append(lua_State* L) {
 }
 
 extern "C" {
-int LUAMOD_API luaopen_buffer(lua_State* L) {
+int luaopen_buffer(lua_State* L) {
     luaL_Reg l[] = {
         { "unsafe_new", unsafe_new },
         { "delete", unsafe_delete },
