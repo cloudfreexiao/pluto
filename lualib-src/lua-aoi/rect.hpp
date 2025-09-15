@@ -1,5 +1,8 @@
 #pragma once
 
+#include <limits> 
+
+
 template<typename ValueType>
 class rect {
 public:
