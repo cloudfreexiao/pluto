@@ -1,6 +1,6 @@
 #include "lua_utility.hpp"
 #include "navmesh.hpp"
-#include "lua.hpp"
+
 
 #define METANAME "lnavmesh"
 

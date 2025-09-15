@@ -1,11 +1,13 @@
 #include <lua.hpp>
+
 #include "buffer.hpp"
 #include "byte_convert.hpp"
+#include "string.hpp"
+
+using buffer_ptr_t = std::unique_ptr<pluto::buffer>;
+using buffer_shr_ptr_t = std::shared_ptr<pluto::buffer>;
 
 using namespace pluto;
-
-using buffer_ptr_t = std::unique_ptr<buffer>;
-using buffer_shr_ptr_t = std::shared_ptr<buffer>;
 
 constexpr int MAX_DEPTH = 32;
 
@@ -13,17 +15,20 @@ static buffer* get_pointer(lua_State* L, int index) {
     buffer* b = nullptr;
     if (lua_type(L, index) == LUA_TLIGHTUSERDATA) {
         b = static_cast<buffer*>(lua_touserdata(L, index));
-    } else {
+    } else if (lua_type(L, index) == LUA_TUSERDATA) {
         auto shr = static_cast<buffer_shr_ptr_t*>(lua_touserdata(L, index));
         if (shr == nullptr) {
-            luaL_argerror(L, index, "null buffer_shr_ptr_t pointer");
+            luaL_argerror(L, index, "buffer: expected buffer_shr_ptr_t userdata, got null pointer");
             return nullptr;
         }
         b = shr->get();
+    } else {
+        luaL_argerror(L, index, format("buffer: expected buffer lightuserdata or buffer_shr_ptr_t userdata, got %s", lua_typename(L, lua_type(L, index))).c_str());
+        return nullptr;
     }
 
     if (b == nullptr)
-        luaL_argerror(L, index, "null buffer pointer");
+        luaL_argerror(L, index, "buffer: expected valid buffer pointer, got null pointer");
     return b;
 }
 
@@ -40,14 +45,17 @@ static int size(lua_State* L) {
 }
 
 template<typename T>
-static void pushinteger(lua_State* L, const char*& b, const char* e, bool little) {
-    if ((size_t)(e - b) < sizeof(T))
+static void push_integer(lua_State* L, const char*& b, const char* e, bool little) {
+    if (ptrdiff_t len = e - b; len < static_cast<ptrdiff_t>(sizeof(T))){
         luaL_error(
             L,
-            "data string too short, need %zu bytes, got %zu bytes",
-            sizeof(T),
-            (size_t)(e - b)
+            "buffer.unpack: insufficient data for %I-byte integer, need %I bytes, got %I bytes",
+            (lua_Integer)sizeof(T),
+            (lua_Integer)sizeof(T),
+            (lua_Integer)len
         );
+    }
+
     T v = 0;
     memcpy(&v, b, sizeof(T));
     b += sizeof(T);
@@ -67,7 +75,7 @@ static int unpack(lua_State* L) {
         const char* opt = luaL_optlstring(L, 2, "", &opt_len);
         auto pos = static_cast<size_t>(luaL_optinteger(L, 3, 0));
         if (pos > buf->size())
-            return luaL_argerror(L, 3, "position out of range");
+            return luaL_argerror(L, 3, format("buffer.unpack: position out of range (pos=%I, buffer_size=%I)", (lua_Integer)pos, (lua_Integer)buf->size()).c_str());
 
         const char* start = buf->data() + pos;
         const char* end = buf->data() + buf->size();
@@ -82,35 +90,38 @@ static int unpack(lua_State* L) {
                     little = true;
                     break;
                 case 'h':
-                    pushinteger<int16_t>(L, start, end, little);
+                    push_integer<int16_t>(L, start, end, little);
                     break;
                 case 'H':
-                    pushinteger<uint16_t>(L, start, end, little);
+                    push_integer<uint16_t>(L, start, end, little);
                     break;
                 case 'i':
-                    pushinteger<int32_t>(L, start, end, little);
+                    push_integer<int32_t>(L, start, end, little);
                     break;
                 case 'I':
-                    pushinteger<uint32_t>(L, start, end, little);
+                    push_integer<uint32_t>(L, start, end, little);
                     break;
                 case 'C':
                     lua_pushlightuserdata(L, (void*)start);
                     lua_pushinteger(L, end - start);
                     break;
                 default:
-                    return luaL_error(
-                        L,
-                        "invalid format option '%c', valid options are '>','<','h','H','i','I','C'",
-                        opt[i]
-                    );
+                    return luaL_argerror(L, 2, format("buffer.unpack: invalid format character '%c', valid options are: '>' (big-endian), '<' (little-endian), 'h' (int16), 'H' (uint16), 'i' (int32), 'I' (uint32), 'C' (raw data)", opt[i]).c_str());
             }
         }
     } else {
         auto pos = static_cast<size_t>(luaL_optinteger(L, 2, 0));
         if (pos > buf->size())
-            return luaL_argerror(L, 2, "position out of range");
-        auto count = static_cast<size_t>(luaL_optinteger(L, 3, -1));
-        count = std::min(buf->size() - pos, count);
+            return luaL_argerror(L, 2, format("buffer.unpack: position out of range (pos=%I, buffer_size=%I)", (lua_Integer)pos, (lua_Integer)buf->size()).c_str());
+        
+        lua_Integer count_arg = luaL_optinteger(L, 3, -1);
+        size_t count;
+        if (count_arg < 0) {
+            count = buf->size() - pos;
+        } else {
+            count = static_cast<size_t>(count_arg);
+            count = std::min(buf->size() - pos, count);
+        }
         lua_pushlstring(L, buf->data() + pos, count);
     }
     return lua_gettop(L) - top;
@@ -120,7 +131,7 @@ static int read(lua_State* L) {
     auto buf = get_pointer(L, 1);
     auto count = static_cast<size_t>(luaL_checkinteger(L, 2));
     if (count > buf->size())
-        return luaL_argerror(L, 2, "count exceeds buffer size");
+        return luaL_argerror(L, 2, format("buffer.read: requested %I bytes but buffer only has %I bytes", (lua_Integer)count, (lua_Integer)buf->size()).c_str());
     lua_pushlstring(L, buf->data(), count);
     buf->consume_unchecked(count);
     return 1;
@@ -141,15 +152,13 @@ static int concat_table_array(lua_State* L, buffer* buf, int index, int depth) {
 
 static void concat_table(lua_State* L, buffer* buf, int index, int depth) {
     luaL_checkstack(L, LUA_MINSTACK, NULL);
-    if (index < 0) {
-        index = lua_gettop(L) + index + 1;
-    }
+    index = lua_absindex(L, index);
     concat_table_array(L, buf, index, depth);
 }
 
 static void concat_one(lua_State* L, buffer* b, int index, int depth) {
     if (depth > MAX_DEPTH) {
-        throw std::logic_error { "buffer.concat too deep table (possibly circular reference)" };
+        throw std::logic_error { "buffer.concat: table nesting too deep (max " + std::to_string(MAX_DEPTH) + " levels), possible circular reference" };
     }
 
     int type = lua_type(L, index);
@@ -175,15 +184,11 @@ static void concat_one(lua_State* L, buffer* b, int index, int depth) {
             break;
         }
         case LUA_TTABLE: {
-            if (index < 0) {
-                index = lua_gettop(L) + index + 1;
-            }
             concat_table(L, b, index, depth + 1);
             break;
         }
         default:
-            throw std::logic_error { std::string("buffer.concat_one unsupported type: ")
-                                     + lua_typename(L, type) };
+            throw std::logic_error { "buffer.concat: unsupported type '" + std::string(lua_typename(L, type)) + "', only string, number, boolean, table, and nil are supported" };
     }
 }
 
@@ -198,8 +203,10 @@ static int write_front(lua_State* L) {
         if (!ok)
             break;
     }
-    lua_pushboolean(L, ok ? 1 : 0);
-    return 1;
+    if(!ok) {   
+        luaL_argerror(L, 1, "buffer.write_front: total prepend size exceeds limit");
+    }
+    return 0;
 }
 
 static int write_back(lua_State* L) {
@@ -223,7 +230,7 @@ static int seek(lua_State* L) {
         ((luaL_optinteger(L, 3, 1) == 1) ? buffer::seek_origin::Current : buffer::seek_origin::Begin
         );
     if (!buf->seek(pos, origin))
-        return luaL_error(L, "position out of range, pos=%zu size=%zu", pos, buf->size());
+        return luaL_argerror(L, 2, format("buffer.seek: position out of range (pos=%I, buffer_size=%I)", (lua_Integer)pos, (lua_Integer)buf->size()).c_str());
     return 0;
 }
 
@@ -231,7 +238,7 @@ static int commit(lua_State* L) {
     auto buf = get_pointer(L, 1);
     auto n = static_cast<size_t>(luaL_checkinteger(L, 2));
     if (!buf->commit(n)) {
-        return luaL_error(L, "Invalid commit size: %zu exceeds available capacity", n);
+        return luaL_argerror(L, 2, format("buffer.commit: commit size %I exceeds prepared capacity", (lua_Integer)n).c_str());
     }
     return 0;
 }
@@ -240,7 +247,7 @@ static int prepare(lua_State* L) {
     auto buf = get_pointer(L, 1);
     auto n = static_cast<size_t>(luaL_checkinteger(L, 2));
     if (0 == n) {
-        return luaL_error(L, "Invalid buffer prepare param: size must be greater than 0");
+        return luaL_argerror(L, 2, format("buffer.prepare: size must be greater than 0, got %I", (lua_Integer)n).c_str());
     }
     buf->prepare(n);
     return 0;
@@ -253,7 +260,20 @@ static int unsafe_delete(lua_State* L) {
 }
 
 static int unsafe_new(lua_State* L) {
-    size_t capacity = static_cast<size_t>(luaL_optinteger(L, 1, buffer::DEFAULT_CAPACITY));
+    lua_Integer capacity_arg = luaL_optinteger(L, 1, buffer::DEFAULT_CAPACITY);
+    
+    // Check for valid capacity
+    if (capacity_arg <= 0) {
+        return luaL_argerror(L, 1, format("buffer.unsafe_new: capacity must be positive, got %I", capacity_arg).c_str());
+    }
+    
+    // Check for reasonable upper limit to prevent excessive memory allocation
+    constexpr lua_Integer MAX_CAPACITY = 1024 * 1024 * 1024; // 1GB
+    if (capacity_arg > MAX_CAPACITY) {
+        return luaL_argerror(L, 1, format("buffer.unsafe_new: capacity too large (max %I), got %I", MAX_CAPACITY, capacity_arg).c_str());
+    }
+    
+    size_t capacity = static_cast<size_t>(capacity_arg);
     buffer* buf = new buffer { capacity };
     lua_pushlightuserdata(L, buf);
     return 1;
@@ -301,9 +321,13 @@ static int concat_string(lua_State* L) {
 }
 
 static int to_shared(lua_State* L) {
+    if (lua_type(L, 1) != LUA_TLIGHTUSERDATA) {
+        return luaL_argerror(L, 1, format("buffer.to_shared: expected buffer lightuserdata, got %s", lua_typename(L, lua_type(L, 1))).c_str());
+    }
+    
     buffer* b = (buffer*)lua_touserdata(L, 1);
     if (nullptr == b)
-        return luaL_argerror(L, 1, "lightuserdata(buffer*) expected");
+        return luaL_argerror(L, 1, "buffer.to_shared: expected buffer lightuserdata, got null pointer");
 
     if (b->size() == 0) {
         return 0;
@@ -316,7 +340,7 @@ static int to_shared(lua_State* L) {
         auto gc = [](lua_State* L) {
             buffer_shr_ptr_t* shr = (buffer_shr_ptr_t*)lua_touserdata(L, 1);
             if (nullptr == shr)
-                return luaL_argerror(L, 1, "invalid buffer_shr_ptr_t pointer");
+                return luaL_argerror(L, 1, "buffer.__gc: invalid buffer_shr_ptr_t pointer");
             std::destroy_at(shr);
             return 0;
         };
@@ -370,25 +394,27 @@ static int append(lua_State* L) {
 }
 
 extern "C" {
-int luaopen_buffer(lua_State* L) {
-    luaL_Reg l[] = { { "unsafe_new", unsafe_new },
-                     { "delete", unsafe_delete },
-                     { "clear", clear },
-                     { "size", size },
-                     { "unpack", unpack },
-                     { "read", read },
-                     { "write_front", write_front },
-                     { "write_back", write_back },
-                     { "seek", seek },
-                     { "commit", commit },
-                     { "prepare", prepare },
-                     { "concat", concat },
-                     { "concat_string", concat_string },
-                     { "to_shared", to_shared },
-                    //  { "has_bitmask", has_bitmask },
-                    //  { "add_bitmask", add_bitmask },
-                     { "append", append },
-                     { NULL, NULL } };
+int LUAMOD_API luaopen_buffer(lua_State* L) {
+    luaL_Reg l[] = {
+        { "unsafe_new", unsafe_new },
+        { "delete", unsafe_delete },
+        { "clear", clear },
+        { "size", size },
+        { "unpack", unpack },
+        { "read", read },
+        { "write_front", write_front },
+        { "write_back", write_back },
+        { "seek", seek },
+        { "commit", commit },
+        { "prepare", prepare },
+        { "concat", concat },
+        { "concat_string", concat_string },
+        { "to_shared", to_shared },
+        // { "has_bitmask", has_bitmask },
+        // { "add_bitmask", add_bitmask },
+        { "append", append },
+        { NULL, NULL },
+    };
     luaL_newlib(L, l);
     return 1;
 }

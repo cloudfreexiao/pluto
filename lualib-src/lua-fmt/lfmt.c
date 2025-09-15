@@ -55,14 +55,15 @@ typedef struct fmt_State {
     lua_State *L;
     luaL_Buffer B;
     int idx, top, zeroing;
+    const char *p, *e;
 } fmt_State;
 
 #define fmt_check(S,cond,...) ((void)((cond)||luaL_error((S)->L,__VA_ARGS__)))
 
+
 /* read argid */
 
-#define fmt_argslot(S)  ((S)->top+1)
-#define fmt_tmpslot(S)  ((S)->top+2)
+#define fmt_value(S,i)  ((S)->top+(i))
 #define fmt_isdigit(ch) ((ch) >= '0' && (ch) <= '9')
 #define fmt_isalpha(ch) ((ch) == '_' \
         || ((ch) >= 'A' && (ch) <= 'Z') \
@@ -82,77 +83,75 @@ static int fmt_autoidx(fmt_State *S) {
     return S->idx;
 }
 
-static int fmt_integer(fmt_State *S, const char **pp) {
-    const char *p = *pp;
-    unsigned v = 0;
-    do {
-        int o = v < INT_MAX/10 || (v == INT_MAX/10 && *p++ <= INT_MAX%10);
+static int fmt_integer(fmt_State *S, int *pv) {
+    const char *p = S->p;
+    unsigned idx = 0;
+    while (p < S->e && fmt_isdigit(*p)) {
+        int o = idx < INT_MAX/10 || (idx == INT_MAX/10 && *p++ <= INT_MAX%10);
         fmt_check(S, o, "Too many decimal digits in format string");
-        v = v*10 + (*p++ - '0');
-    } while (fmt_isdigit(*p));
-    return (*pp = p), v;
+        idx = idx*10 + (*p++ - '0');
+    }
+    if (p == S->p) return 0;
+    if (pv) *pv = (int)idx;
+    S->p = p;
+    return 1;
 }
 
-static void fmt_identity(fmt_State *S, const char **pp) {
-    const char *p = *pp;
-    while (*++p && (fmt_isalpha(*p) || fmt_isdigit(*p)))
-        ;
-    lua_pushlstring(S->L, *pp, p - *pp);
-    *pp = p;
+static int fmt_identity(fmt_State *S) {
+    const char *p = S->p;
+    if (fmt_isalpha(*p))
+        while (++p < S->e && (fmt_isalpha(*p) || fmt_isdigit(*p)))
+            ;
+    if (p == S->p) return 0;
+    lua_pushlstring(S->L, S->p, p - S->p);
+    S->p = p;
+    return 1;
 }
 
-static void fmt_accessor(fmt_State *S, int to, const char **pp, const char *e) {
+static int fmt_accessor(fmt_State *S, int to) {
     /* "." (number | identity) | "[" <anychar except ']'> "]" */
-    const char *p = *pp;
-    do {
+    while (*S->p == '.' || *S->p == '[') {
         int idx;
-        if (*p++ == '.') {
-            if (fmt_isdigit(*p))
-                lua_geti(S->L, to, fmt_integer(S, &p));
-            else if (fmt_isalpha(*p))
-                fmt_identity(S, &p), lua_gettable(S->L, to);
-            else luaL_error(S->L, "unexpected '%c' in field name", *p);
-        } else { /* *p == '[' */
-            const char *c = p;
-            if (fmt_isdigit(*c) && ((idx = fmt_integer(S, &c)), *c == ']'))
+        const char *p = ++S->p;
+        if (p[-1] == '.') {
+            if (fmt_integer(S, &idx))
                 lua_geti(S->L, to, idx);
-            else {
-                while (c < e && *c != ']') ++c;
-                fmt_check(S, c < e,  "expected '}' before end of string1");
-                lua_pushlstring(S->L, p, c - p);
+            else if (fmt_identity(S))
                 lua_gettable(S->L, to);
-            }
-            p = c + 1;
+            else luaL_error(S->L, "unexpected '%c' in field name", *S->p);
+        } else if (fmt_integer(S, &idx) && *S->p == ']')
+            lua_geti(S->L, to, idx), ++S->p;
+        else {
+            while (p < S->e && *p != ']') ++p;
+            fmt_check(S, p < S->e,  "expected '}' before end of string");
+            lua_pushlstring(S->L, S->p, p - S->p);
+            S->p = p + 1;
+            lua_gettable(S->L, to);
         }
         lua_replace(S->L, to);
-    } while (*p == '.' || *p == '[');
-    *pp = p;
+    }
+    return 1;
 }
 
-static void fmt_argid(fmt_State *S, int to, const char **pp, const char *e) {
+static int fmt_argid(fmt_State *S, int to) {
     /* [(number | identity) [accessor]] */
-    const char *p = *pp;
-    fmt_check(S, p < e, "expected '}' before end of string2");
-    do {
-        int idx;
-        if (*p == ':' || *p == '}') {
-            idx = fmt_autoidx(S);
-            lua_copy(S->L, idx, to);
-        } else if (fmt_isdigit(*p)) {
-            fmt_manualidx(S);
-            idx = fmt_integer(S, &p) + 1;
-            fmt_check(S, idx>1 && idx<=S->top, "argument index out of range");
-            lua_copy(S->L, idx, to);
-        } else if (fmt_isalpha(*p)) {
-            fmt_manualidx(S);
-            fmt_identity(S, &p);
-            lua_gettable(S->L, 2);
-            lua_replace(S->L, to);
-        } else luaL_error(S->L, "unexpected '%c' in field name", *p);
-    } while (0);
-    *pp = p;
-    if (*p == '.' || *p == '[') fmt_accessor(S, to, pp, e);
+    int idx;
+    fmt_check(S, S->p < S->e, "expected '}' before end of string");
+    if (*S->p == ':' || *S->p == '}')
+        lua_pushvalue(S->L, fmt_autoidx(S));
+    else if (fmt_integer(S, &idx)) {
+        fmt_manualidx(S);
+        fmt_check(S, idx>=1 && idx <=S->top, "argument index out of range");
+        lua_pushvalue(S->L, idx+1);
+    } else {
+        fmt_manualidx(S);
+        fmt_check(S, fmt_identity(S), "unexpected '%c' in field name", *S->p);
+        lua_gettable(S->L, 2);
+    }
+    lua_replace(S->L, to);
+    return fmt_accessor(S, to);
 }
+
 
 /* read spec */
 
@@ -168,57 +167,55 @@ typedef struct fmt_Spec {
     int type;
 } fmt_Spec;
 
-static int fmt_readchar(fmt_State *S, const char **pp, const char *e) {
-    int ch = *(*pp)++;
-    fmt_check(S, *pp < e, "unmatched '{' in format spec");
+static int fmt_readchar(fmt_State *S) {
+    int ch = *S->p++;
+    fmt_check(S, S->p < S->e, "unmatched '{' in format spec");
     return ch;
 }
 
-static int fmt_readint(fmt_State *S, const char *name, const char **pp, const char *e) {
-    /* number | '{' argid '}' */
-    const char *p = *pp;
+static int fmt_readint(fmt_State *S, int required, const char *name) {
     int isint, v = 0;
-    if (*p == '{') {
-        p += 1;
-        fmt_argid(S, fmt_tmpslot(S), &p, e);
-        fmt_check(S, *p == '}', "unexpected '%c' in field name", *p);
-        *pp = p + 1;
-        v = (int)lua_tointegerx(S->L, fmt_tmpslot(S), &isint);
+    if (*S->p != '{') {
+        fmt_check(S, fmt_integer(S, &v) || !required,
+                "Format specifier missing %s", name);
+        fmt_check(S, S->p < S->e, "unmatched '{' in format spec");
+    } else {
+        ++S->p;
+        fmt_argid(S, fmt_value(S, 2));
+        fmt_check(S, *S->p == '}', "unexpected '%c' in field name", *S->p);
+        ++S->p;
+        v = (int)lua_tointegerx(S->L, fmt_value(S, 2), &isint);
         fmt_check(S, isint, "integer expected for %s, got %s",
-                name, luaL_typename(S->L, fmt_tmpslot(S)));
-    } else if (fmt_isdigit(*p)) {
-        v = fmt_integer(S, pp);
-        fmt_check(S, *pp < e, "unmatched '{' in format spec");
-    } else luaL_error(S->L, "Format specifier missing %s", name);
+                name, luaL_typename(S->L, fmt_value(S, 2)));
+    }
     return v;
 }
 
-static void fmt_spec(fmt_State *S, fmt_Spec *d, const char **pp, const char *e) {
+static int fmt_spec(fmt_State *S, fmt_Spec *d) {
     /* [[fill]align][sign]["#"]["0"][width][grouping]["." precision][type] */
-    const char *p = *pp;
-    if (p[1] == '<' || p[1] == '>' || p[1] == '^') {
-        d->fill  = fmt_readchar(S, &p, e);
-        d->align = fmt_readchar(S, &p, e);
-    } else if (*p == '<' || *p == '>' || *p == '^')
-        d->align = fmt_readchar(S, &p, e);
-    if (*p == ' ' || *p == '+' || *p == '-')
-        d->sign = fmt_readchar(S, &p, e);
-    if (*p == '#') d->alter = fmt_readchar(S, &p, e);
-    if (*p == '0') d->zero  = fmt_readchar(S, &p, e);
-    if (fmt_isdigit(*p) || *p == '{') d->width = fmt_readint(S, "width", &p, e);
-    if (*p == '_' || *p == ',') d->grouping = fmt_readchar(S, &p, e);
-    if (*p == '.') ++p, d->precision = fmt_readint(S, "precision", &p, e);
-    if (*p != '}') {
-        const char *b = p++;
-        d->type = *b;
-        if (*p != '}') {
-            while (p < e && *p != '}') ++p;
-            fmt_check(S, p < e, "unmatched '{' in format spec");
-            luaL_error(S->L, "Invalid format specifier: '%s'", b);
+    if (S->p[1] == '<' || S->p[1] == '>' || S->p[1] == '^')
+        d->fill  = fmt_readchar(S), d->align = fmt_readchar(S);
+    else if (*S->p == '<' || *S->p == '>' || *S->p == '^')
+        d->align = fmt_readchar(S);
+    if (*S->p == ' ' || *S->p == '+' || *S->p == '-')
+        d->sign = fmt_readchar(S);
+    if (*S->p == '#') d->alter = fmt_readchar(S);
+    if (*S->p == '0') d->zero  = fmt_readchar(S);
+    d->width = fmt_readint(S, 0, "width");
+    if (*S->p == '_' || *S->p == ',') d->grouping = fmt_readchar(S);
+    if (*S->p == '.') ++S->p, d->precision = fmt_readint(S, 1, "precision");
+    if (*S->p != '}') {
+        const char *p = S->p++;
+        d->type = *p;
+        if (*S->p != '}') {
+            while (S->p < S->e && *S->p != '}') ++S->p;
+            fmt_check(S, S->p < S->e, "unmatched '{' in format spec");
+            return luaL_error(S->L, "Invalid format specifier: '%s'", p);
         }
     }
-    *pp = p;
+    return 1;
 }
+
 
 /* write spec */
 
@@ -227,7 +224,6 @@ static void fmt_spec(fmt_State *S, fmt_Spec *d, const char **pp, const char *e) 
 #define FMT_FMTLEN      10 /* "%#.99f" */
 #define FMT_FLTMAXPREC  100
 #define FMT_INTBUFFSIZ  100
-#define FMT_PTRBUFFSIZ  100
 #define FMT_FLTBUFFSIZ  (10 + FMT_FLTMAXPREC + FLT_MAX_10_EXP)
 
 static void fmt_addpadding(fmt_State *S, int ch, size_t len) {
@@ -249,13 +245,13 @@ static void fmt_addzeroing(fmt_State *S, const fmt_Spec *d, size_t len) {
     if (len > (size_t)S->zeroing) {
         int pref = (len - S->zeroing) % 4;
         if (pref > 2) *s++ = '0', luaL_addsize(&S->B, 1);
-        if (pref > 0) *s++ = '0', *s++ = d->grouping, luaL_addsize(&S->B, 2);
+        if (pref > 0) *s++ = '0', *s++ = (char)d->grouping, luaL_addsize(&S->B, 2);
         len -= pref;
         while (len > 4) {
             size_t curr = len > LUAL_BUFFERSIZE ? LUAL_BUFFERSIZE : len;
             s = luaL_prepbuffer(&S->B);
             while (curr > 4) {
-                s[0] = s[1] = s[2] = '0', s[3] = d->grouping;
+                s[0] = s[1] = s[2] = '0', s[3] = (char)d->grouping;
                 s += 4, luaL_addsize(&S->B, 4), curr -= 4, len -= 4;
             }
         }
@@ -263,15 +259,17 @@ static void fmt_addzeroing(fmt_State *S, const fmt_Spec *d, size_t len) {
     memset(s, '0', len), luaL_addsize(&S->B, len);
 }
 
-static void fmt_addstring(fmt_State *S, int shrink, const fmt_Spec *d, const char *s, size_t len) {
-    size_t plen;
+static void fmt_addstring(fmt_State *S, int shrink, size_t width, const fmt_Spec *d) {
+    size_t len, plen;
+    const char *s = lua_tolstring(S->L, fmt_value(S,1), &len);
     if (shrink && d->precision)
         len = len > (size_t)d->precision ? (size_t)d->precision : len;
-    if (len > (size_t)d->width) {
-        luaL_addlstring(&S->B, s, len);
+    if (len > width) {
+        lua_pushvalue(S->L, fmt_value(S,1));
+        luaL_addvalue(&S->B);
         return;
     }
-    plen = d->width - (int)len;
+    plen = width - (int)len;
     switch (d->align) {
     case 0:
     case '<': !d->zero || d->grouping == 0 ?
@@ -286,7 +284,7 @@ static void fmt_addstring(fmt_State *S, int shrink, const fmt_Spec *d, const cha
     }
 }
 
-static void fmt_dumpstr(fmt_State *S, const fmt_Spec *d, const char *s, size_t len) {
+static void fmt_dumpstr(fmt_State *S, const fmt_Spec *d) {
     fmt_check(S, !d->type || d->type == 's' || d->type == 'p',
             "Unknown format code '%c' for object of type 'string'", d->type);
     fmt_check(S, !d->sign,
@@ -298,27 +296,22 @@ static void fmt_dumpstr(fmt_State *S, const fmt_Spec *d, const char *s, size_t l
     fmt_check(S, !d->grouping,
             "Grouping form (%c) not allowed in string format specifier",
             d->grouping);
-    fmt_addstring(S, 1, d, s, len);
+    fmt_addstring(S, 1, d->width, d);
 }
 
-static size_t fmt_pushutf8(unsigned long x, char buff[FMT_UTF8BUFFSIZ]) {
-    char *p = buff + FMT_UTF8BUFFSIZ;
+static void fmt_pushutf8(fmt_State *S, unsigned long x) {
+    char buff[FMT_UTF8BUFFSIZ], *p = buff + FMT_UTF8BUFFSIZ;
     unsigned int mfb = 0x3f;
-    if (x < 0x80) 
-        *--p = (char)x;
-    else {
-        do {
-            *--p = (char)(0x80 | (x & 0x3f));
-            x >>= 6, mfb >>= 1;
-        } while (x > mfb);
-        *--p = (char)((~mfb << 1) | x);
-    }
-    return p - buff;
+    if (x < 0x80) { lua_pushfstring(S->L, "%c", x); return; }
+    do {
+        *--p = (char)(0x80 | (x & 0x3f));
+        x >>= 6, mfb >>= 1;
+    } while (x > mfb);
+    *--p = (char)((~mfb << 1) | x);
+    lua_pushlstring(S->L, p, FMT_UTF8BUFFSIZ - (p-buff));
 }
 
 static void fmt_dumpchar(fmt_State *S, lua_Integer cp, const fmt_Spec *d) {
-    char buff[FMT_UTF8BUFFSIZ];
-    size_t loc;
     fmt_check(S, !d->sign,
             "Sign not allowed with integer format specifier 'c'");
     fmt_check(S, !d->alter,
@@ -329,8 +322,9 @@ static void fmt_dumpchar(fmt_State *S, lua_Integer cp, const fmt_Spec *d) {
             "Cannot specify '%c' with 'c'", d->grouping);
     fmt_check(S, cp >= 0 && cp <= INT_MAX,
             "'c' arg not in range(%d)", INT_MAX);
-    loc = fmt_pushutf8((unsigned long)cp, buff);
-    fmt_addstring(S, 0, d, buff+loc, FMT_UTF8BUFFSIZ-loc);
+    fmt_pushutf8(S, (unsigned long)cp);
+    lua_replace(S->L, fmt_value(S,1));
+    fmt_addstring(S, 0, d->width, d);
 }
 
 static int fmt_writesign(int sign, int dsign) {
@@ -353,29 +347,30 @@ static int fmt_writeint(char **pp, lua_Integer v, const fmt_Spec *d) {
     }
     zeroing = d->grouping ? FMT_DELIMITPOS : 0;
     while (*--p = hexa[v % radix], v /= radix, --zeroing, v)
-        if (!zeroing) zeroing = FMT_DELIMITPOS, *--p = d->grouping;
+        if (!zeroing) zeroing = FMT_DELIMITPOS, *--p = (char)d->grouping;
     *pp = p;
     return zeroing;
 }
 
-static void fmt_dumpint(fmt_State *S, lua_Integer v, fmt_Spec *d) {
-    char buff[FMT_INTBUFFSIZ], *p = buff + FMT_INTBUFFSIZ, *b;
+static void fmt_dumpint(fmt_State *S, lua_Integer v, const fmt_Spec *d) {
+    char buff[FMT_INTBUFFSIZ], *p = buff + FMT_INTBUFFSIZ, *dp;
     int sign = !(v < 0), width = d->width;
     if (!sign) v = -v;
     S->zeroing = fmt_writeint(&p, v, d);
-    b = p;
+    dp = p;
     if (d->alter && d->type != 0 && d->type != 'd')
-        *--p = d->type, *--p = '0';
-    if ((p[-1] = fmt_writesign(sign, d->sign)) != 0) --p;
+        *--p = (char)d->type, *--p = '0';
+    if ((p[-1] = (char)fmt_writesign(sign, d->sign)) != 0) --p;
     if (d->zero && d->width > FMT_INTBUFFSIZ - (p-buff)) {
-        if (b > p) luaL_addlstring(&S->B, p, b - p);
-        width -= (int)(b - p), p = b;
+        if (dp > p) luaL_addlstring(&S->B, p, dp - p);
+        width -= (int)(dp - p), p = dp;
     }
-    d->width = width;
-    fmt_addstring(S, 0, d, p, FMT_INTBUFFSIZ-(p-buff));
+    lua_pushlstring(S->L, p, FMT_INTBUFFSIZ - (p-buff));
+    lua_replace(S->L, fmt_value(S,1));
+    fmt_addstring(S, 0, width, d);
 }
 
-static int fmt_writeflt(char *s, size_t n, lua_Number v, fmt_Spec *d) {
+static int fmt_writeflt(char *s, size_t n, lua_Number v, const fmt_Spec *d) {
     int type = d->type ? d->type : 'g';
     int (*ptr_snprintf)(char *s, size_t n, const char *fmt, ...) = snprintf;
     char fmt[FMT_FMTLEN];
@@ -386,16 +381,13 @@ static int fmt_writeflt(char *s, size_t n, lua_Number v, fmt_Spec *d) {
                 d->alter ? "#" : "", d->precision, type, percent);
     else if ((lua_Number)(lua_Integer)v == v)
         ptr_snprintf(fmt, FMT_FMTLEN, "%%.1f%s", percent);
-    else if (!*percent && type == 'g')
-        return d->alter ? snprintf(s, n, "%#g", v) :
-            snprintf(s, n, "%g", v);
     else
         ptr_snprintf(fmt, FMT_FMTLEN, "%%%s%c%s",
                 d->alter ? "#" : "", type, percent);
     return ptr_snprintf(s, n, fmt, v);
 }
 
-static void fmt_dumpflt(fmt_State *S, lua_Number v, fmt_Spec *d) {
+static void fmt_dumpflt(fmt_State *S, lua_Number v, const fmt_Spec *d) {
     int sign = !(v < 0), len, width = d->width;
     char buff[FMT_FLTBUFFSIZ], *p = buff, *dp = p;
     fmt_check(S, d->precision < FMT_FLTMAXPREC,
@@ -404,95 +396,94 @@ static void fmt_dumpflt(fmt_State *S, lua_Number v, fmt_Spec *d) {
             "Grouping form (%c) not allowed in float format specifier",
             d->grouping);
     if (!sign) v = -v;
-    if ((*dp = fmt_writesign(sign, d->sign)) != 0) ++dp;
+    if ((*dp = (char)fmt_writesign(sign, d->sign)) != 0) ++dp;
     len = fmt_writeflt(dp, FMT_FLTBUFFSIZ - (dp-buff), v, d);
     if (d->zero && width > len) {
         if (dp > p) luaL_addlstring(&S->B, buff, dp - p);
         width -= (int)(dp - buff), p = dp;
     }
-    d->width = width;
-    fmt_addstring(S, 0, d, p, len);
+    lua_pushlstring(S->L, p, len);
+    lua_replace(S->L, fmt_value(S,1));
+    fmt_addstring(S, 0, width, d);
 }
 
-static void fmt_dumpnumber(fmt_State *S, fmt_Spec *d) {
+static void fmt_dumpnumber(fmt_State *S, const fmt_Spec *d) {
     int type = d->type;
-    if (type == 0) type = lua_isinteger(S->L, fmt_argslot(S)) ? 'd' : 'g';
+    if (type == 0) type = lua_isinteger(S->L, fmt_value(S,1)) ? 'd' : 'g';
     switch (type) {
     case 'c':
-        fmt_dumpchar(S, lua_tointeger(S->L, fmt_argslot(S)), d); break;
+        fmt_dumpchar(S, lua_tointeger(S->L, fmt_value(S,1)), d); break;
     case 'd': case 'b': case 'B': case 'o': case 'O': case 'x': case 'X':
-        fmt_dumpint(S, lua_tointeger(S->L, fmt_argslot(S)), d); break;
+        fmt_dumpint(S, lua_tointeger(S->L, fmt_value(S,1)), d); break;
     case 'e': case 'E': case 'f': case 'F': case 'g': case 'G': case '%':
-        fmt_dumpflt(S, lua_tonumber(S->L, fmt_argslot(S)), d); break;
+        fmt_dumpflt(S, lua_tonumber(S->L, fmt_value(S,1)), d); break;
     default:
         luaL_error(S->L, "Unknown format code '%c' for object of type 'number'",
                       d->type);
     }
 }
 
-static void fmt_dump(fmt_State *S, fmt_Spec *d) {
-    int type = lua_type(S->L, fmt_argslot(S));
-    if (type == LUA_TNUMBER)
-        fmt_dumpnumber(S, d);
-    else if (d->type != 'p') {
-        size_t len;
-        const char *s = luaL_tolstring(S->L, fmt_argslot(S), &len);
-        lua_replace(S->L, fmt_argslot(S));
-        fmt_dumpstr(S, d, s, len);
-    } else {
-        const char *s;
+static void fmt_dump(fmt_State *S, const fmt_Spec *d) {
+    int type = lua_type(S->L, fmt_value(S,1));
+    if (type == LUA_TNUMBER) { fmt_dumpnumber(S, d); return; }
+    if (d->type != 'p')
+        luaL_tolstring(S->L, fmt_value(S,1), NULL);
+    else {
         fmt_check(S, type != LUA_TNIL && type != LUA_TBOOLEAN,
                 "Unknown format code '%c' for object of type '%s'",
                 d->type, lua_typename(S->L, type));
-        s = lua_pushfstring(S->L, "%p", lua_topointer(S->L, fmt_argslot(S)));
-        lua_replace(S->L, fmt_argslot(S));
-        fmt_dumpstr(S, d, s, strlen(s));
+        lua_pushfstring(S->L, "%p", lua_topointer(S->L, fmt_value(S,1)));
     }
+    lua_replace(S->L, fmt_value(S,1));
+    fmt_dumpstr(S, d);
 }
+
 
 /* format */
 
-static void fmt_parse(fmt_State *S, fmt_Spec *d, const char **pp, const char *e) {
+static void fmt_parse(fmt_State *S, fmt_Spec *d) {
     /* "{" [arg_id] [":" format_spec] "}" */
-    const char *p = *pp;
-    fmt_argid(S, fmt_argslot(S), &p, e);
-    if (*p == ':' && ++p < e)
-        fmt_spec(S, d, &p, e);
-    fmt_check(S, p < e && *p == '}', "expected '}' before end of string3");
-    *pp = p + 1;
+    fmt_argid(S, fmt_value(S, 1));
+    if (*S->p == ':' && ++S->p < S->e)
+        fmt_spec(S, d);
+    fmt_check(S, S->p < S->e && *S->p == '}',
+            "expected '}' before end of string");
+    ++S->p;
 }
 
-static int fmt_format(fmt_State *S, const char *p, const char *e) {
-    lua_settop(S->L, S->top + 2); /* two helper slot */
+static int fmt_format(fmt_State *S) {
+    lua_settop(S->L, fmt_value(S, 2));
     luaL_buffinit(S->L, &S->B);
-    for (;;) {
-        const char *b = p;
-        while (p < e && *p != '{' && *p != '}') ++p;
-        if (b < p) luaL_addlstring(&S->B, b, p - b);
-        if (p >= e) break;
-        if (*p == p[1])
-            luaL_addchar(&S->B, *p), p += 2;
+    while (S->p < S->e) {
+        const char *p = S->p;
+        while (p < S->e && *p != '{' && *p != '}') ++p;
+        luaL_addlstring(&S->B, S->p, p - S->p), S->p = p;
+        if (S->p >= S->e) break;
+        if (*S->p == S->p[1])
+            luaL_addchar(&S->B, *S->p), S->p += 2;
         else {
             fmt_Spec d;
-            if (*p++ == '}' || p >= e)
+            if (*S->p++ == '}' || S->p >= S->e)
                 return luaL_error(S->L,
-                    "Single '%c' encountered in format string", p[-1]);
+                    "Single '%c' encountered in format string", S->p[-1]);
             memset(&d, 0, sizeof(d));
-            fmt_parse(S, &d, &p, e);
+            fmt_parse(S, &d);
             fmt_dump(S, &d);
         }
     }
-    return luaL_pushresult(&S->B), 1;
+    luaL_pushresult(&S->B);
+    return 1;
 }
 
 static int Lformat(lua_State *L) {
-    fmt_State S;
     size_t len;
-    const char *p = luaL_checklstring(L, 1, &len);
+    fmt_State S;
+    S.p   = luaL_checklstring(L, 1, &len);
+    S.e   = S.p + len;
     S.L   = L;
     S.idx = 1;
     S.top = lua_gettop(L);
-    return fmt_format(&S, p, p+len);
+    return fmt_format(&S);
 }
 
 LUALIB_API int luaopen_fmt(lua_State *L) {
@@ -505,3 +496,4 @@ LUALIB_API int luaopen_fmt(lua_State *L) {
  * maccc: flags+='-undefined dynamic_lookup'
  * win32cc: flags+='-s -mdll -DLUA_BUILD_AS_DLL '
  * win32cc: libs+='-llua54' output='fmt.dll' */
+

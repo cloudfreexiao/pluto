@@ -1,10 +1,5 @@
 #pragma once
 
-#include <algorithm>
-#include <array>
-#include <cmath>
-#include <cstdint>
-
 template<typename ValueType>
 class rect {
 public:

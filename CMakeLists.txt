@@ -124,9 +124,9 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     aux_source_directory(lualib-src/lua-buffer BUFFER_SRC)
     add_library(buffer SHARED ${BUFFER_SRC})
 
-    # 生成动态库 zset.so
+    # 生成动态库 skiplist.so
     aux_source_directory(lualib-src/lua-zset ZSET_SRC)
-    add_library(zset SHARED ${ZSET_SRC})
+    add_library(skiplist SHARED ${ZSET_SRC})
 
     # 生成动态库 aoi.so
     aux_source_directory(lualib-src/lua-aoi AOI_SRC)
@@ -162,7 +162,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
         lpeg sproto client md5 bson
         pb lfs 
         fmt json 
-        buffer zset 
+        buffer skiplist 
         aoi navmesh 
         math3d clonefunc
         PROPERTIES
@@ -312,10 +312,10 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     add_library(buffer SHARED ${BUFFER_SRC})
     target_link_libraries(buffer liblua)
 
-    # 生成动态库 zset.so
+    # 生成动态库 skiplist.so
     aux_source_directory(lualib-src/lua-zset ZSET_SRC)
-    add_library(zset SHARED ${ZSET_SRC})
-    target_link_libraries(zset liblua)
+    add_library(skiplist SHARED ${ZSET_SRC})
+    target_link_libraries(skiplist liblua)
 
     # 生成动态库 aoi.so
     aux_source_directory(lualib-src/lua-aoi AOI_SRC)
@@ -355,7 +355,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
         lpeg sproto md5 bson skynetso
         pb lfs 
         fmt json 
-        buffer zset 
+        buffer skiplist 
         aoi navmesh
         math3d clonefunc
         PROPERTIES
@@ -494,9 +494,9 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     aux_source_directory(lualib-src/lua-buffer BUFFER_SRC)
     add_library(buffer SHARED ${BUFFER_SRC})
 
-    # 生成动态库 zset.so
+    # 生成动态库 skiplist.so
     aux_source_directory(lualib-src/lua-zset ZSET_SRC)
-    add_library(zset SHARED ${ZSET_SRC})
+    add_library(skiplist SHARED ${ZSET_SRC})
 
     # 生成动态库 aoi.so
     aux_source_directory(lualib-src/lua-aoi AOI_SRC)
@@ -531,7 +531,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
         lpeg sproto client md5 bson
         pb lfs 
         fmt json 
-        buffer zset 
+        buffer skiplist 
         aoi navmesh
         math3d clonefunc
         PROPERTIES
