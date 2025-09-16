@@ -24,7 +24,7 @@
 -- | Day of week  | 1-27            |       , - *        |
 -- +-----------------------------------------------------+
 --
-local timex = require("timex")
+local timex = require("core.timex")
 
 local Crontab = {}
 
@@ -424,10 +424,10 @@ local function get_next_occurrence_till(self, base_timestamp, end_timestamp)
     local curWeek = timex.get_week_day(next_timestamp)
     local curWeekNum = timex.get_sys_week_num(next_timestamp)
     if curWeekNum % 2 == 0 then
-    ---@diagnostic disable-next-line: cast-local-type
+        ---@diagnostic disable-next-line: cast-local-type
         curWeekNum = tonumber("2" .. curWeek)
     else
-    ---@diagnostic disable-next-line: cast-local-type
+        ---@diagnostic disable-next-line: cast-local-type
         curWeekNum = tonumber("1" .. curWeek)
     end
 

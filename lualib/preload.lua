@@ -1,3 +1,3 @@
-_ENV.class = require("oop.middleclass")
-_ENV.singleton = require("oop.singleton")
-_ENV.readonly = require("oop.readonly")
+_ENV.class = require("core.middleclass")
+_ENV.singleton = require("core.singleton")
+_ENV.readonly = require("core.readonly")

@@ -1,18 +1,17 @@
 local skynet = require "skynet"
-----------------------------------------------
--- 处理 连续多个服务调用时完全独立的,不必等到service1 返回后才调用service2 ... 操作
+-- 处理 连续多个服务调用时完全独立的，不必等到service1 返回后才调用service2 ... 操作
 
 local M = {}
 
 local mt = {
-    __index = M
+    __index = M,
 }
 
 local function new()
     return setmetatable({
         list = {},
-        boot_co = nil,
-        boot_error = nil
+        _bootCo = nil,
+        _bootError = nil,
     }, mt)
 end
 
@@ -23,14 +22,14 @@ local function exception(e)
 end
 
 function M:wakeup_waitco(err)
-    if not self.boot_error then
-        self.boot_error = err
+    if not self._bootError then
+        self._bootError = err
     end
-    local boot_co = self.boot_co
-    if boot_co then
-        self.boot_co = nil
+    local bootCo = self._bootCo
+    if bootCo then
+        self._bootCo = nil
         -- 唤醒一个被 skynet.sleep 或 skynet.wait 挂起的 coroutine
-        skynet.wakeup(boot_co)
+        skynet.wakeup(bootCo)
     end
 end
 
@@ -55,19 +54,26 @@ function M:add(func, ...)
 end
 
 function M:wait()
-    assert(not self.boot_co, string.format("already in wait %s", tostring(self.boot_co)))
-    self.boot_co = coroutine.running()
+    assert(not self._bootCo, string.format("already in wait %s", tostring(self._bootCo)))
+    self._bootCo = coroutine.running()
     if not next(self.list) then
         -- skynet.yield() 相当于 skynet.sleep(0) 交出当前服务对 CPU 的控制权
         -- 通常在你想做大量的操作，又没有机会调用阻塞 API 时，可以选择调用 yield 让系统跑的更平滑
         skynet.yield()
     else
         -- 把当前 coroutine 挂起，之后由 skynet.wakeup 唤醒。token 必须是唯一的，默认为 coroutine.running()
-        skynet.wait(self.boot_co)
+        skynet.wait(self._bootCo)
     end
-    if self.boot_error then
-        error(self.boot_error)
+    if self._bootError then
+        error(self._bootError)
     end
+end
+
+function M:foreach(tb, func, ...)
+    for key, item in pairs(tb) do
+        self:add(func, key, item, ...)
+    end
+    self:wait()
 end
 
 return new
