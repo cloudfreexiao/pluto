@@ -158,13 +158,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     add_library(clonefunc SHARED ${CLONEFUNC_SRC} ${LUA_LIB_SRC})
     target_include_directories(clonefunc PRIVATE skynet/skynet-src)
 
-    # 生成动态库 zlog.so
-    aux_source_directory(lualib-src/lua-zlog LZLOG_SRC)
-    aux_source_directory(3rd/zlog/src ZLOG_SRC)
-    list(REMOVE_ITEM ZLOG_SRC 3rd/zlog/src/zlog_win.c)
-    add_library(zlog SHARED ${ZLOG_SRC} ${LZLOG_SRC})
-    target_include_directories(zlog PRIVATE 3rd/zlog/src)
-
     set_target_properties(
         lpeg sproto client md5 bson
         pb lfs 
@@ -172,7 +165,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
         buffer skiplist 
         aoi navmesh 
         math3d clonefunc
-        zlog 
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
@@ -358,13 +350,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     add_library(clonefunc SHARED ${CLONEFUNC_SRC} ${LUA_LIB_SRC})
     target_include_directories(clonefunc PRIVATE skynet/skynet-src)
 
-    # 生成动态库 zlog.so
-    aux_source_directory(lualib-src/lua-zlog LZLOG_SRC)
-    aux_source_directory(3rd/zlog/src ZLOG_SRC)
-    add_library(zlog SHARED ${ZLOG_SRC} ${LZLOG_SRC})
-    target_include_directories(zlog PRIVATE 3rd/zlog/src)
-    target_link_libraries(zlog liblua)
-
     # 设置动态库属性
     set_target_properties(
         lpeg sproto md5 bson skynetso
@@ -373,7 +358,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
         buffer skiplist 
         aoi navmesh
         math3d clonefunc
-        zlog 
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
@@ -538,19 +522,10 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     target_include_directories(math3d PRIVATE 3rd/glm/include/)
     target_compile_definitions(math3d PRIVATE -DGLM_ENABLE_EXPERIMENTAL -DGLM_FORCE_QUAT_DATA_XYZW)
 
-
-
     # 生成动态库 clonefunc.so
     aux_source_directory(lualib-src/lua-clonefunc CLONEFUNC_SRC)
     add_library(clonefunc SHARED ${CLONEFUNC_SRC} ${LUA_LIB_SRC})
     target_include_directories(clonefunc PRIVATE skynet/skynet-src)
-
-    # 生成动态库 zlog.so
-    aux_source_directory(lualib-src/lua-zlog LZLOG_SRC)
-    aux_source_directory(3rd/zlog/src ZLOG_SRC)
-    list(REMOVE_ITEM ZLOG_SRC 3rd/zlog/src/zlog_win.c)
-    add_library(zlog SHARED ${ZLOG_SRC} ${LZLOG_SRC})
-    target_include_directories(zlog PRIVATE 3rd/zlog/src)
 
     set_target_properties(
         lpeg sproto client md5 bson
@@ -559,7 +534,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
         buffer skiplist 
         aoi navmesh
         math3d clonefunc
-        zlog 
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
