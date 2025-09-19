@@ -1,4 +1,4 @@
-local skynet = require "skynet"
+local skynet = require("skynet")
 local coroutine = coroutine
 local xpcall = xpcall
 local traceback = debug.traceback
