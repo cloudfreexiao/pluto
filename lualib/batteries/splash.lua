@@ -14,7 +14,6 @@ local sqrt = math.sqrt
 local floor = math.floor
 local wrap = coroutine.wrap
 local yield = coroutine.yield
-local sort = table.sort
 
 local SPACE_KEY_CONST = 2 ^ 25
 local EPSILON = 2 ^ (-25)
