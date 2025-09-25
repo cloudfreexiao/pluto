@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
-    message(STATUS "The value of CMAKE_BUILD_TYPE is: Release")
+    message(STATUS "The value of CMAKE_BUILD_TYPE is: ${CMAKE_BUILD_TYPE}")
 endif()
 
 # 把lua头文件添加到全局搜索路径
