@@ -156,7 +156,7 @@ static int lnew(lua_State* L) {
 
 // Module entry point function
 extern "C" {
-int LUAMOD_API luaopen_scram(lua_State* L) {
+int luaopen_scram(lua_State* L) {
     luaL_Reg l[] = {
         { "new", lnew },
         { nullptr, nullptr },
