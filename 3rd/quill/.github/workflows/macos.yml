@@ -1,0 +1,56 @@
+name: macOS
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'scripts/**'
+
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'scripts/**'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ macos-14 ]
+        build_type: [ Debug, Release ]
+        std: [ 17, 20 ]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{runner.workspace}}/build
+
+    - name: Configure
+      working-directory: ${{runner.workspace}}/build
+      run: |
+        cmake -DCMAKE_BUILD_TYPE=${{matrix.build_type}} \
+              -DCMAKE_CXX_STANDARD=${{matrix.std}} -DQUILL_BUILD_TESTS=ON \
+              -DQUILL_BUILD_EXAMPLES=ON -DQUILL_VERBOSE_MAKEFILE=ON $GITHUB_WORKSPACE
+
+    - name: Build
+      working-directory: ${{runner.workspace}}/build
+      run: |
+        threads=`sysctl -n hw.logicalcpu`
+        cmake --build . --config ${{matrix.build_type}} --parallel $threads
+
+    - name: Test
+      working-directory: ${{runner.workspace}}/build
+      run: |
+        threads=`sysctl -n hw.logicalcpu`
+        ctest --build-config ${{matrix.build_type}} --parallel $threads --output-on-failure

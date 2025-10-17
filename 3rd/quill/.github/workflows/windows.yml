@@ -1,0 +1,102 @@
+name: Windows
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'scripts/**'
+
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'scripts/**'
+
+jobs:
+  msvc:
+    # windows-2016 and windows-2019 have MSVC 2017 and 2019 installed
+    # respectively: https://github.com/actions/virtual-environments.
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ windows-2022 ]
+        platform: [ x64 ]
+        build_type: [ Debug, Release ]
+        std: [ 17, 20 ]
+        with_tests: [ ON ]
+
+        include:
+          # Builds the examples with no exceptions
+          - os: windows-2022
+            platform: x64
+            build_type: Release
+            std: 17
+            with_tests: "OFF"
+            cmake_options: -DQUILL_NO_EXCEPTIONS=ON -DQUILL_BUILD_TESTS=ON
+
+          # Builds for ARM
+          - os: windows-2022
+            platform: ARM64
+            build_type: Release
+            std: 17
+            with_tests: "OFF"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create Build Environment
+        run: cmake -E make_directory ${{runner.workspace}}/build
+
+      - name: Configure
+        shell: bash         # Use a bash shell for $GITHUB_WORKSPACE.
+        working-directory: ${{runner.workspace}}/build
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=${{matrix.build_type}} ${{matrix.cmake_options}} \
+              -A ${{matrix.platform}} -DCMAKE_CXX_STANDARD=${{matrix.std}} -DQUILL_BUILD_TESTS=${{matrix.with_tests}} \
+              -DQUILL_BUILD_EXAMPLES=ON -DQUILL_VERBOSE_MAKEFILE=ON $GITHUB_WORKSPACE
+
+      - name: Build
+        working-directory: ${{runner.workspace}}/build
+        run: |
+          $threads = (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
+          cmake --build . --config ${{matrix.build_type}} --parallel $threads
+
+      - name: Test
+        working-directory: ${{runner.workspace}}/build
+        run: |
+          $threads = (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
+          ctest --build-config ${{matrix.build_type}} --parallel $threads --output-on-failure
+
+  mingw:
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: msys2 {0}
+    strategy:
+      matrix:
+        sys: [mingw64, ucrt64]
+        build_type: [Release]
+        std: [17]
+        with_tests: [ ON ]
+    steps:
+      - uses: msys2/setup-msys2@v2
+        with:
+          release: false
+          msystem: ${{matrix.sys}}
+          pacboy: cc:p cmake:p ninja:p
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -B ../build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_CXX_STANDARD=${{matrix.std}} -DQUILL_BUILD_TESTS=${{matrix.with_tests}} -DQUILL_BUILD_EXAMPLES=ON -DQUILL_VERBOSE_MAKEFILE=ON
+      - name: Build
+        run: cmake --build ../build
+      # - name: Test
+      #  run: ctest --test-dir ../build --output-on-failure

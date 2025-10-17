@@ -1,0 +1,139 @@
+<mxfile host="app.diagrams.net" modified="2024-05-16T00:07:38.477Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0" etag="VW8ihnyupRLc_PgVfbaT" version="22.1.21" type="device">
+  <diagram name="Page-1" id="kLzpoFuRwS6fnHKDuZMH">
+    <mxGraphModel dx="2066" dy="1145" grid="1" gridSize="12" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="BmINEKKr7EmUC2mtGokD-1" value="hot thread" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="258" y="66" width="100" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-2" value="hot thread" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="653" y="66" width="100" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-5" value="" style="shape=waypoint;sketch=0;fillStyle=solid;size=6;pointerEvents=1;points=[];fillColor=none;resizable=0;rotatable=0;perimeter=centerPerimeter;snapToPoint=1;" parent="1" vertex="1">
+          <mxGeometry x="498" y="91" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-6" value="" style="shape=waypoint;sketch=0;fillStyle=solid;size=6;pointerEvents=1;points=[];fillColor=none;resizable=0;rotatable=0;perimeter=centerPerimeter;snapToPoint=1;" parent="1" vertex="1">
+          <mxGeometry x="576.5" y="91" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-7" value="" style="shape=waypoint;sketch=0;fillStyle=solid;size=6;pointerEvents=1;points=[];fillColor=none;resizable=0;rotatable=0;perimeter=centerPerimeter;snapToPoint=1;" parent="1" vertex="1">
+          <mxGeometry x="418" y="91" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-10" value="thread local context&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;" style="verticalLabelPosition=middle;verticalAlign=middle;html=1;shape=mxgraph.basic.rect;fillColor2=none;strokeWidth=1;size=26.67;indent=5;labelPosition=center;align=center;" parent="1" vertex="1">
+          <mxGeometry x="108" y="246" width="280" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-14" value="SPSC queue&lt;br&gt;(bounded or unbounded)" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.donut;dx=25;fillColor=#fff2cc;strokeColor=#000000;container=0;perimeterSpacing=1;labelPosition=center;align=center;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="268" y="291" width="90" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-15" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;dashed=1;dashPattern=12 12;labelPosition=left;verticalLabelPosition=top;align=right;verticalAlign=bottom;entryX=0.46;entryY=0.026;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="BmINEKKr7EmUC2mtGokD-1" target="BmINEKKr7EmUC2mtGokD-14" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="458" y="306" as="sourcePoint" />
+            <mxPoint x="478" y="266" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-16" value="TransitEvent buffer (unbounded)" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.donut;dx=25;fillColor=#e1d5e7;strokeColor=#000000;container=0;shadow=0;perimeterSpacing=1;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="128" y="291" width="90" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-19" value="1. A hot thread pushes a header and a copy of (args...) to a queue" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="403" y="176" width="210" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-20" value="Backend logging thread&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;" style="ellipse;whiteSpace=wrap;html=1;shadow=0;sketch=0;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="268" y="694" width="520" height="440" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-24" value="thread local context&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;" style="verticalLabelPosition=middle;verticalAlign=middle;html=1;shape=mxgraph.basic.rect;fillColor2=none;strokeWidth=1;size=26.67;indent=5;labelPosition=center;align=center;" parent="1" vertex="1">
+          <mxGeometry x="628" y="246" width="280" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-25" value="SPSC queue&lt;br&gt;(bounded or unbounded)" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.donut;dx=25;fillColor=#fff2cc;strokeColor=#000000;container=0;perimeterSpacing=1;labelPosition=center;align=center;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="658" y="296" width="90" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-26" value="TransitEvent buffer (unbounded)" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.donut;dx=25;fillColor=#e1d5e7;strokeColor=#000000;container=0;shadow=0;perimeterSpacing=1;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="788" y="296" width="90" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-27" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;dashed=1;dashPattern=12 12;labelPosition=left;verticalLabelPosition=top;align=right;verticalAlign=bottom;entryX=0.511;entryY=0.001;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="BmINEKKr7EmUC2mtGokD-2" target="BmINEKKr7EmUC2mtGokD-25" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="388" y="171" as="sourcePoint" />
+            <mxPoint x="340.0857142857144" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-29" value="" style="shape=waypoint;sketch=0;fillStyle=solid;size=6;pointerEvents=1;points=[];fillColor=none;resizable=0;rotatable=0;perimeter=centerPerimeter;snapToPoint=1;" parent="1" vertex="1">
+          <mxGeometry x="498" y="316" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-31" value="" style="shape=waypoint;sketch=0;fillStyle=solid;size=6;pointerEvents=1;points=[];fillColor=none;resizable=0;rotatable=0;perimeter=centerPerimeter;snapToPoint=1;" parent="1" vertex="1">
+          <mxGeometry x="576.5" y="316" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-32" value="" style="shape=waypoint;sketch=0;fillStyle=solid;size=6;pointerEvents=1;points=[];fillColor=none;resizable=0;rotatable=0;perimeter=centerPerimeter;snapToPoint=1;" parent="1" vertex="1">
+          <mxGeometry x="418" y="316" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-34" value="2. The backend thread pops all messages from all queues, decodes them and stores&amp;nbsp;&lt;br&gt;them in the TransitEvent buffer" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="418" y="456" width="194" height="84" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-61" value="" style="rounded=0;whiteSpace=wrap;html=1;shadow=0;sketch=0;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="473" y="800" width="110" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-43" value="3.TransitEvents are processed after all SPSC queues are empty or when a max limit is reached. The TransitEvent with the min timestamp is passed to the all the registered Sinks." style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="108" y="648" width="240" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-46" value="" style="rounded=1;whiteSpace=wrap;html=1;shadow=0;sketch=0;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="508" y="910" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-45" value="" style="rounded=1;whiteSpace=wrap;html=1;shadow=0;sketch=0;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="508" y="826" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-48" value="" style="shape=waypoint;sketch=0;fillStyle=solid;size=6;pointerEvents=1;points=[];fillColor=none;resizable=0;rotatable=0;perimeter=centerPerimeter;snapToPoint=1;" parent="1" vertex="1">
+          <mxGeometry x="518" y="870" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-49" value="" style="shape=waypoint;sketch=0;fillStyle=solid;size=6;pointerEvents=1;points=[];fillColor=none;resizable=0;rotatable=0;perimeter=centerPerimeter;snapToPoint=1;" parent="1" vertex="1">
+          <mxGeometry x="518" y="890" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-52" value="Sinks" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="498" y="800" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-53" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;dashPattern=12 12;strokeColor=default;exitX=0.822;exitY=0.87;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.419;entryY=0.008;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="BmINEKKr7EmUC2mtGokD-14" target="BmINEKKr7EmUC2mtGokD-20" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="458" y="516" as="sourcePoint" />
+            <mxPoint x="538" y="666" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-54" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;dashPattern=12 12;strokeColor=default;exitX=0.156;exitY=0.862;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.571;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="BmINEKKr7EmUC2mtGokD-25" target="BmINEKKr7EmUC2mtGokD-20" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="321.98799999999983" y="392" as="sourcePoint" />
+            <mxPoint x="598" y="666" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-56" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;dashPattern=12 12;strokeColor=default;entryX=0.909;entryY=0.826;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.356;exitY=0.006;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="BmINEKKr7EmUC2mtGokD-20" target="BmINEKKr7EmUC2mtGokD-16" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="518" y="666" as="sourcePoint" />
+            <mxPoint x="508" y="466" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-57" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;dashPattern=12 12;strokeColor=default;entryX=0.17;entryY=0.928;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.637;exitY=0.003;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="BmINEKKr7EmUC2mtGokD-20" target="BmINEKKr7EmUC2mtGokD-26" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="568" y="656" as="sourcePoint" />
+            <mxPoint x="220.62800000000016" y="375.99199999999996" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-58" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;dashPattern=12 12;strokeColor=default;exitX=0.442;exitY=1.051;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" parent="1" source="BmINEKKr7EmUC2mtGokD-16" target="BmINEKKr7EmUC2mtGokD-61" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="352.6239999999998" y="380.03999999999996" as="sourcePoint" />
+            <mxPoint x="488" y="826" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-59" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;dashPattern=12 12;strokeColor=default;exitX=0.812;exitY=0.899;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.827;entryY=0.007;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="BmINEKKr7EmUC2mtGokD-26" target="BmINEKKr7EmUC2mtGokD-61" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="177.66400000000021" y="396.692" as="sourcePoint" />
+            <mxPoint x="508" y="826" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-62" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;dashPattern=12 12;strokeColor=default;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" source="BmINEKKr7EmUC2mtGokD-61" target="BmINEKKr7EmUC2mtGokD-65" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="458" y="766" as="sourcePoint" />
+            <mxPoint x="502" y="1036" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BmINEKKr7EmUC2mtGokD-65" value="4. Sink output&amp;nbsp;" style="rounded=1;whiteSpace=wrap;html=1;shadow=0;sketch=0;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="432.5" y="1006" width="191" height="90" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
