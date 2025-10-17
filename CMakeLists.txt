@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # 把lua头文件添加到全局搜索路径
 include_directories(skynet/3rd/lua/
+                    3rd/plog/include/
                     lualib-src/common/)
 
 # Linux
@@ -162,22 +163,14 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     add_library(clonefunc SHARED ${CLONEFUNC_SRC} ${LUA_LIB_SRC})
     target_include_directories(clonefunc PRIVATE skynet/skynet-src)
 
-    # 生成动态库 syslog.so
-    aux_source_directory(lualib-src/lua-syslog SYSLOG_SRC)
-    add_library(syslog SHARED ${SYSLOG_SRC})
-
     # 生成动态库 scram.so
     aux_source_directory(lualib-src/lua-scram SCRAM_SRC)
     add_library(scram SHARED ${SCRAM_SRC})
 
     set_target_properties(
         lpeg sproto client md5 bson
-        pb lfs 
-        fmt json 
-        buffer skiplist 
-        aoi navmesh 
-        math3d clonefunc
-        syslog scram
+        pb lfs fmt json buffer skiplist 
+        aoi navmesh math3d clonefunc scram 
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
@@ -375,13 +368,9 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
 
     # 设置动态库属性
     set_target_properties(
-        lpeg sproto md5 bson skynetso
-        pb lfs 
-        fmt json 
-        buffer skiplist 
-        aoi navmesh
-        math3d clonefunc
-        scram 
+        lpeg sproto md5 bson skynetso 
+        pb lfs fmt json buffer skiplist 
+        aoi navmesh math3d clonefunc scram 
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
@@ -556,22 +545,15 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     add_library(clonefunc SHARED ${CLONEFUNC_SRC} ${LUA_LIB_SRC})
     target_include_directories(clonefunc PRIVATE skynet/skynet-src)
 
-    # 生成动态库 syslog.so
-    aux_source_directory(lualib-src/lua-syslog SYSLOG_SRC)
-    add_library(syslog SHARED ${SYSLOG_SRC})
-
     # 生成动态库 scram.so
     aux_source_directory(lualib-src/lua-scram SCRAM_SRC)
     add_library(scram SHARED ${SCRAM_SRC})
     
     set_target_properties(
         lpeg sproto client md5 bson
-        pb lfs 
-        fmt json 
-        buffer skiplist 
-        aoi navmesh
-        math3d clonefunc
-        syslog scram
+        pb lfs fmt json buffer skiplist 
+        aoi navmesh math3d clonefunc
+        scram 
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
