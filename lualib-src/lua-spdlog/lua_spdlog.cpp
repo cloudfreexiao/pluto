@@ -1,7 +1,6 @@
 #include <lua.hpp>
 
-#include "spdlog/spdlog.h"
-
+#include "spdlog.hpp"
 
 extern "C" {
 int luaopen_spdlog(lua_State* L) {
