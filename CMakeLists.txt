@@ -166,11 +166,16 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     aux_source_directory(lualib-src/lua-scram SCRAM_SRC)
     add_library(scram SHARED ${SCRAM_SRC})
 
+    # 生成动态库 spdlog.so
+    aux_source_directory(lualib-src/lua-spdlog SPDLOG_SRC)
+    add_library(spdlog SHARED ${SPDLOG_SRC})
+    target_include_directories(spdlog PRIVATE 3rd/spdlog/include)
+
     set_target_properties(
         lpeg sproto client md5 bson 
         pb lfs fmt json buffer skiplist 
         aoi navmesh math3d clonefunc 
-        scram 
+        scram spdlog 
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
@@ -366,12 +371,18 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     add_library(scram SHARED ${SCRAM_SRC})
     target_link_libraries(scram liblua)
 
+    # 生成动态库 spdlog.so
+    aux_source_directory(lualib-src/lua-spdlog SPDLOG_SRC)
+    add_library(spdlog SHARED ${SPDLOG_SRC})
+    target_include_directories(spdlog PRIVATE 3rd/spdlog/include)
+    target_link_libraries(spdlog liblua)
+
     # 设置动态库属性
     set_target_properties(
         lpeg sproto md5 bson skynetso 
         pb lfs fmt json buffer skiplist 
         aoi navmesh math3d clonefunc 
-        scram 
+        scram spdlog 
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
@@ -549,12 +560,17 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     # 生成动态库 scram.so
     aux_source_directory(lualib-src/lua-scram SCRAM_SRC)
     add_library(scram SHARED ${SCRAM_SRC})
-    
+
+    # 生成动态库 spdlog.so
+    aux_source_directory(lualib-src/lua-spdlog SPDLOG_SRC)
+    add_library(spdlog SHARED ${SPDLOG_SRC})
+    target_include_directories(spdlog PRIVATE 3rd/spdlog/include)
+
     set_target_properties(
         lpeg sproto client md5 bson 
         pb lfs fmt json buffer skiplist 
         aoi navmesh math3d clonefunc 
-        scram 
+        scram spdlog 
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
