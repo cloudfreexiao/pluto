@@ -131,7 +131,10 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     target_link_libraries(fmt liblua)
 
     # 生成动态库 json.so
-    add_library(json SHARED lualib-src/lua-json/lua_json.cpp)
+    aux_source_directory(3rd/yyjson YYJSON_SRC)
+    aux_source_directory(lualib-src/lua-json/ JSON_SRC)
+    add_library(json SHARED ${YYJSON_SRC} ${JSON_SRC})
+    target_include_directories(json PRIVATE 3rd/yyjson/)
     target_link_libraries(json liblua)
 
     # 生成动态库 buffer.so
@@ -323,7 +326,10 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     add_library(fmt SHARED ${FMT_SRC})
 
     # 生成动态库 json.so
-    add_library(json SHARED lualib-src/lua-json/lua_json.cpp)
+    aux_source_directory(3rd/yyjson YYJSON_SRC)
+    aux_source_directory(lualib-src/lua-json/ JSON_SRC)
+    add_library(json SHARED ${YYJSON_SRC} ${JSON_SRC})
+    target_include_directories(json PRIVATE 3rd/yyjson/)
 
     # 生成动态库 buffer.so
     aux_source_directory(lualib-src/lua-buffer BUFFER_SRC)
@@ -511,7 +517,10 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     add_library(fmt SHARED ${FMT_SRC})
 
     # 生成动态库 json.so
-    add_library(json SHARED lualib-src/lua-json/lua_json.cpp)
+    aux_source_directory(3rd/yyjson YYJSON_SRC)
+    aux_source_directory(lualib-src/lua-json/ JSON_SRC)
+    add_library(json SHARED ${YYJSON_SRC} ${JSON_SRC})
+    target_include_directories(json PRIVATE 3rd/yyjson/)
 
     # 生成动态库 buffer.so
     aux_source_directory(lualib-src/lua-buffer BUFFER_SRC)
