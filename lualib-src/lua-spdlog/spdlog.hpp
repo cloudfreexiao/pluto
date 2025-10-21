@@ -15,19 +15,13 @@
 #include <spdlog/sinks/stdout_sinks.h>
 #include <spdlog/sinks/tcp_sink.h>
 #include <spdlog/spdlog.h>
-#ifndef _WIN32
-    #include <spdlog/sinks/syslog_sink.h>
-#endif
 
-#include <iostream>
 #include <memory>
 #include <mutex>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
-
-namespace spd = spdlog;
 
 namespace pluto {
 
@@ -62,39 +56,38 @@ void remove_logger_all() {
 
 class LogLevel {
 public:
-    const static int trace { (int)spd::level::trace };
-    const static int debug { (int)spd::level::debug };
-    const static int info { (int)spd::level::info };
-    const static int warn { (int)spd::level::warn };
-    const static int err { (int)spd::level::err };
-    const static int critical { (int)spd::level::critical };
-    const static int off { (int)spd::level::off };
+    const static int trace { (int)spdlog::level::trace };
+    const static int debug { (int)spdlog::level::debug };
+    const static int info { (int)spdlog::level::info };
+    const static int warn { (int)spdlog::level::warn };
+    const static int err { (int)spdlog::level::err };
+    const static int critical { (int)spdlog::level::critical };
+    const static int off { (int)spdlog::level::off };
 };
 
 class Sink {
 public:
     Sink() = default;
-    explicit Sink(const spd::sink_ptr& sink): _sink(sink) {}
+    explicit Sink(const spdlog::sink_ptr& sink): _sink(sink) {}
     virtual ~Sink() {}
-    virtual void log(const spd::details::log_msg& msg) {
+    virtual void log(const spdlog::details::log_msg& msg) {
         _sink->log(msg);
     }
     bool should_log(int msg_level) const {
-        return _sink->should_log((spd::level::level_enum)msg_level);
+        return _sink->should_log((spdlog::level::level_enum)msg_level);
     }
     void set_level(int log_level) {
-        _sink->set_level((spd::level::level_enum)log_level);
+        _sink->set_level((spdlog::level::level_enum)log_level);
     }
     int level() const {
         return (int)_sink->level();
     }
-
-    spd::sink_ptr get_sink() const {
+    spdlog::sink_ptr get_sink() const {
         return _sink;
     }
 
 protected:
-    spd::sink_ptr _sink { nullptr };
+    spdlog::sink_ptr _sink { nullptr };
 };
 
 class stdout_sink_st: public Sink {
@@ -218,9 +211,9 @@ public:
         _sink = std::make_shared<spdlog::sinks::dist_sink<Mutex>>();
     }
     dist_sink(std::vector<Sink> sinks) {
-        std::vector<spd::sink_ptr> sink_vec;
-        for (uint i = 0; i < sinks.size(); i++) {
-            sink_vec.push_back(sinks.at(i).get_sink());
+        std::vector<spdlog::sink_ptr> sink_vec;
+        for (const auto & sink : sinks) {
+            sink_vec.push_back(sink.get_sink());
         }
         _sink = std::make_shared<spdlog::sinks::dist_sink<Mutex>>(sink_vec);
     }
@@ -236,20 +229,20 @@ public:
     }
 
     void set_sinks(std::vector<Sink> sinks) {
-        std::vector<spd::sink_ptr> sink_vec;
-        for (uint i = 0; i < sinks.size(); i++) {
-            sink_vec.push_back(sinks.at(i).get_sink());
+        std::vector<spdlog::sink_ptr> sink_vec;
+        for (const auto & sink : sinks) {
+            sink_vec.push_back(sink.get_sink());
         }
         std::dynamic_pointer_cast<spdlog::sinks::dist_sink<Mutex>>(_sink)->set_sinks(sink_vec);
     }
 
-    std::vector<spd::sink_ptr>& sinks() {
+    std::vector<spdlog::sink_ptr>& sinks() {
         return std::dynamic_pointer_cast<spdlog::sinks::dist_sink<Mutex>>(_sink)->sinks();
     }
 };
 
 using dist_sink_mt = dist_sink<std::mutex>;
-using dist_sink_st = dist_sink<spd::details::null_mutex>;
+using dist_sink_st = dist_sink<spdlog::details::null_mutex>;
 
 class dup_filter_sink_mt: public dist_sink_mt {
 public:
@@ -283,42 +276,6 @@ public:
     }
 };
 
-#ifdef SPDLOG_ENABLE_SYSLOG
-class syslog_sink_st: public Sink {
-public:
-    syslog_sink_st(
-        const std::string& ident = "",
-        int syslog_option = 0,
-        int syslog_facility = (1 << 3),
-        bool enable_formatting = true
-    ) {
-        _sink = std::make_shared<spdlog::sinks::syslog_sink_st>(
-            ident,
-            syslog_option,
-            syslog_facility,
-            enable_formatting
-        );
-    }
-};
-
-class syslog_sink_mt: public Sink {
-public:
-    syslog_sink_mt(
-        const std::string& ident = "",
-        int syslog_option = 0,
-        int syslog_facility = (1 << 3),
-        bool enable_formatting = true
-    ) {
-        _sink = std::make_shared<spdlog::sinks::syslog_sink_mt>(
-            ident,
-            syslog_option,
-            syslog_facility,
-            enable_formatting
-        );
-    }
-};
-#endif
-
 class Logger {
 public:
     using async_factory_nb =
@@ -337,7 +294,7 @@ public:
         }
     }
     void log(int level, const std::string& msg) const {
-        this->_logger->log((spd::level::level_enum)level, msg);
+        this->_logger->log((spdlog::level::level_enum)level, msg);
     }
     void trace(const std::string& msg) const {
         this->_logger->trace(msg);
@@ -359,11 +316,11 @@ public:
     }
 
     bool should_log(int level) const {
-        return _logger->should_log((spd::level::level_enum)level);
+        return _logger->should_log((spdlog::level::level_enum)level);
     }
 
     void set_level(int level) {
-        _logger->set_level((spd::level::level_enum)level);
+        _logger->set_level((spdlog::level::level_enum)level);
     }
 
     int level() const {
@@ -372,14 +329,14 @@ public:
 
     void set_pattern(
         const std::string& pattern,
-        spd::pattern_time_type type = spd::pattern_time_type::local
+        spdlog::pattern_time_type type = spdlog::pattern_time_type::local
     ) {
         _logger->set_pattern(pattern, type);
     }
 
     // automatically call flush() if message level >= log_level
     void flush_on(int log_level) {
-        _logger->flush_on((spd::level::level_enum)log_level);
+        _logger->flush_on((spdlog::level::level_enum)log_level);
     }
 
     void flush() {
@@ -398,13 +355,13 @@ public:
 
     std::vector<Sink> sinks() const {
         std::vector<Sink> snks;
-        for (const spd::sink_ptr& sink: _logger->sinks()) {
-            snks.push_back(Sink(sink));
+        for (const spdlog::sink_ptr& sink: _logger->sinks()) {
+            snks.emplace_back(sink);
         }
         return snks;
     }
 
-    void set_error_handler(spd::err_handler handler) {
+    void set_error_handler(spdlog::err_handler handler) {
         _logger->set_error_handler(handler);
     }
 
@@ -435,24 +392,24 @@ public:
                         if (g_async_overflow_policy
                             == spdlog::async_overflow_policy::overrun_oldest)
                         {
-                            _logger = spd::stdout_color_mt<async_factory_nb>(logger_name);
+                            _logger = spdlog::stdout_color_mt<async_factory_nb>(logger_name);
                         } else {
-                            _logger = spd::stdout_color_mt<spdlog::async_factory>(logger_name);
+                            _logger = spdlog::stdout_color_mt<spdlog::async_factory>(logger_name);
                         }
                     } else {
-                        _logger = spd::stdout_color_mt(logger_name);
+                        _logger = spdlog::stdout_color_mt(logger_name);
                     }
                 } else {
                     if (async_mode) {
                         if (g_async_overflow_policy
                             == spdlog::async_overflow_policy::overrun_oldest)
                         {
-                            _logger = spd::stdout_logger_mt<async_factory_nb>(logger_name);
+                            _logger = spdlog::stdout_logger_mt<async_factory_nb>(logger_name);
                         } else {
-                            _logger = spd::stdout_logger_mt<spdlog::async_factory>(logger_name);
+                            _logger = spdlog::stdout_logger_mt<spdlog::async_factory>(logger_name);
                         }
                     } else {
-                        _logger = spd::stdout_logger_mt(logger_name);
+                        _logger = spdlog::stdout_logger_mt(logger_name);
                     }
                 }
             } else {
@@ -461,24 +418,24 @@ public:
                         if (g_async_overflow_policy
                             == spdlog::async_overflow_policy::overrun_oldest)
                         {
-                            _logger = spd::stdout_color_st<async_factory_nb>(logger_name);
+                            _logger = spdlog::stdout_color_st<async_factory_nb>(logger_name);
                         } else {
-                            _logger = spd::stdout_color_st<spdlog::async_factory>(logger_name);
+                            _logger = spdlog::stdout_color_st<spdlog::async_factory>(logger_name);
                         }
                     } else {
-                        _logger = spd::stdout_color_st(logger_name);
+                        _logger = spdlog::stdout_color_st(logger_name);
                     }
                 } else {
                     if (async_mode) {
                         if (g_async_overflow_policy
                             == spdlog::async_overflow_policy::overrun_oldest)
                         {
-                            _logger = spd::stdout_logger_st<async_factory_nb>(logger_name);
+                            _logger = spdlog::stdout_logger_st<async_factory_nb>(logger_name);
                         } else {
-                            _logger = spd::stdout_logger_st<spdlog::async_factory>(logger_name);
+                            _logger = spdlog::stdout_logger_st<spdlog::async_factory>(logger_name);
                         }
                     } else {
-                        _logger = spd::stdout_logger_st(logger_name);
+                        _logger = spdlog::stdout_logger_st(logger_name);
                     }
                 }
             }
@@ -490,24 +447,24 @@ public:
                         if (g_async_overflow_policy
                             == spdlog::async_overflow_policy::overrun_oldest)
                         {
-                            _logger = spd::stderr_color_mt<async_factory_nb>(logger_name);
+                            _logger = spdlog::stderr_color_mt<async_factory_nb>(logger_name);
                         } else {
-                            _logger = spd::stderr_color_mt<spdlog::async_factory>(logger_name);
+                            _logger = spdlog::stderr_color_mt<spdlog::async_factory>(logger_name);
                         }
                     } else {
-                        _logger = spd::stderr_color_mt(logger_name);
+                        _logger = spdlog::stderr_color_mt(logger_name);
                     }
                 } else {
                     if (async_mode) {
                         if (g_async_overflow_policy
                             == spdlog::async_overflow_policy::overrun_oldest)
                         {
-                            _logger = spd::stderr_logger_mt<async_factory_nb>(logger_name);
+                            _logger = spdlog::stderr_logger_mt<async_factory_nb>(logger_name);
                         } else {
-                            _logger = spd::stderr_logger_mt<spdlog::async_factory>(logger_name);
+                            _logger = spdlog::stderr_logger_mt<spdlog::async_factory>(logger_name);
                         }
                     } else {
-                        _logger = spd::stderr_logger_mt(logger_name);
+                        _logger = spdlog::stderr_logger_mt(logger_name);
                     }
                 }
             } else {
@@ -516,24 +473,24 @@ public:
                         if (g_async_overflow_policy
                             == spdlog::async_overflow_policy::overrun_oldest)
                         {
-                            _logger = spd::stderr_color_st<async_factory_nb>(logger_name);
+                            _logger = spdlog::stderr_color_st<async_factory_nb>(logger_name);
                         } else {
-                            _logger = spd::stderr_color_st<spdlog::async_factory>(logger_name);
+                            _logger = spdlog::stderr_color_st<spdlog::async_factory>(logger_name);
                         }
                     } else {
-                        _logger = spd::stderr_color_st(logger_name);
+                        _logger = spdlog::stderr_color_st(logger_name);
                     }
                 } else {
                     if (async_mode) {
                         if (g_async_overflow_policy
                             == spdlog::async_overflow_policy::overrun_oldest)
                         {
-                            _logger = spd::stderr_logger_st<async_factory_nb>(logger_name);
+                            _logger = spdlog::stderr_logger_st<async_factory_nb>(logger_name);
                         } else {
-                            _logger = spd::stderr_logger_st<spdlog::async_factory>(logger_name);
+                            _logger = spdlog::stderr_logger_st<spdlog::async_factory>(logger_name);
                         }
                     } else {
-                        _logger = spd::stderr_logger_st(logger_name);
+                        _logger = spdlog::stderr_logger_st(logger_name);
                     }
                 }
             }
@@ -555,31 +512,31 @@ public:
             if (async_mode) {
                 if (g_async_overflow_policy == spdlog::async_overflow_policy::overrun_oldest) {
                     _logger =
-                        spd::basic_logger_mt<async_factory_nb>(logger_name, filename, truncate);
+                        spdlog::basic_logger_mt<async_factory_nb>(logger_name, filename, truncate);
                 } else {
-                    _logger = spd::basic_logger_mt<spdlog::async_factory>(
+                    _logger = spdlog::basic_logger_mt<spdlog::async_factory>(
                         logger_name,
                         filename,
                         truncate
                     );
                 }
             } else {
-                _logger = spd::basic_logger_mt(logger_name, filename, truncate);
+                _logger = spdlog::basic_logger_mt(logger_name, filename, truncate);
             }
         } else {
             if (async_mode) {
                 if (g_async_overflow_policy == spdlog::async_overflow_policy::overrun_oldest) {
                     _logger =
-                        spd::basic_logger_st<async_factory_nb>(logger_name, filename, truncate);
+                        spdlog::basic_logger_st<async_factory_nb>(logger_name, filename, truncate);
                 } else {
-                    _logger = spd::basic_logger_st<spdlog::async_factory>(
+                    _logger = spdlog::basic_logger_st<spdlog::async_factory>(
                         logger_name,
                         filename,
                         truncate
                     );
                 }
             } else {
-                _logger = spd::basic_logger_st(logger_name, filename, truncate);
+                _logger = spdlog::basic_logger_st(logger_name, filename, truncate);
             }
         }
     }
@@ -599,14 +556,14 @@ public:
         if (multithreaded) {
             if (async_mode) {
                 if (g_async_overflow_policy == spdlog::async_overflow_policy::overrun_oldest) {
-                    _logger = spd::rotating_logger_mt<async_factory_nb>(
+                    _logger = spdlog::rotating_logger_mt<async_factory_nb>(
                         logger_name,
                         filename,
                         max_file_size,
                         max_files
                     );
                 } else {
-                    _logger = spd::rotating_logger_mt<spdlog::async_factory>(
+                    _logger = spdlog::rotating_logger_mt<spdlog::async_factory>(
                         logger_name,
                         filename,
                         max_file_size,
@@ -614,19 +571,20 @@ public:
                     );
                 }
             } else {
-                _logger = spd::rotating_logger_mt(logger_name, filename, max_file_size, max_files);
+                _logger =
+                    spdlog::rotating_logger_mt(logger_name, filename, max_file_size, max_files);
             }
         } else {
             if (async_mode) {
                 if (g_async_overflow_policy == spdlog::async_overflow_policy::overrun_oldest) {
-                    _logger = spd::rotating_logger_st<async_factory_nb>(
+                    _logger = spdlog::rotating_logger_st<async_factory_nb>(
                         logger_name,
                         filename,
                         max_file_size,
                         max_files
                     );
                 } else {
-                    _logger = spd::rotating_logger_st<spdlog::async_factory>(
+                    _logger = spdlog::rotating_logger_st<spdlog::async_factory>(
                         logger_name,
                         filename,
                         max_file_size,
@@ -634,7 +592,8 @@ public:
                     );
                 }
             } else {
-                _logger = spd::rotating_logger_st(logger_name, filename, max_file_size, max_files);
+                _logger =
+                    spdlog::rotating_logger_st(logger_name, filename, max_file_size, max_files);
             }
         }
     }
@@ -654,10 +613,14 @@ public:
         if (multithreaded) {
             if (async_mode) {
                 if (g_async_overflow_policy == spdlog::async_overflow_policy::overrun_oldest) {
-                    _logger =
-                        spd::daily_logger_mt<async_factory_nb>(logger_name, filename, hour, minute);
+                    _logger = spdlog::daily_logger_mt<async_factory_nb>(
+                        logger_name,
+                        filename,
+                        hour,
+                        minute
+                    );
                 } else {
-                    _logger = spd::daily_logger_mt<spdlog::async_factory>(
+                    _logger = spdlog::daily_logger_mt<spdlog::async_factory>(
                         logger_name,
                         filename,
                         hour,
@@ -665,15 +628,19 @@ public:
                     );
                 }
             } else {
-                _logger = spd::daily_logger_mt(logger_name, filename, hour, minute);
+                _logger = spdlog::daily_logger_mt(logger_name, filename, hour, minute);
             }
         } else {
             if (async_mode) {
                 if (g_async_overflow_policy == spdlog::async_overflow_policy::overrun_oldest) {
-                    _logger =
-                        spd::daily_logger_st<async_factory_nb>(logger_name, filename, hour, minute);
+                    _logger = spdlog::daily_logger_st<async_factory_nb>(
+                        logger_name,
+                        filename,
+                        hour,
+                        minute
+                    );
                 } else {
-                    _logger = spd::daily_logger_st<spdlog::async_factory>(
+                    _logger = spdlog::daily_logger_st<spdlog::async_factory>(
                         logger_name,
                         filename,
                         hour,
@@ -681,73 +648,16 @@ public:
                     );
                 }
             } else {
-                _logger = spd::daily_logger_st(logger_name, filename, hour, minute);
+                _logger = spdlog::daily_logger_st(logger_name, filename, hour, minute);
             }
         }
     }
 };
-
-#ifdef SPDLOG_ENABLE_SYSLOG
-class SyslogLogger: public Logger {
-public:
-    SyslogLogger(
-        const std::string& logger_name,
-        bool multithreaded = false,
-        const std::string& ident = "",
-        int syslog_option = 0,
-        int syslog_facilty = (1 << 3),
-        bool async_mode = g_async_mode_on
-    ):
-        Logger(logger_name, async_mode) {
-        if (multithreaded) {
-            if (async_mode) {
-                if (g_async_overflow_policy == spdlog::async_overflow_policy::overrun_oldest) {
-                    _logger = spd::syslog_logger_mt<async_factory_nb>(
-                        logger_name,
-                        ident,
-                        syslog_option,
-                        syslog_facilty
-                    );
-                } else {
-                    _logger = spd::syslog_logger_mt<spdlog::async_factory>(
-                        logger_name,
-                        ident,
-                        syslog_option,
-                        syslog_facilty
-                    );
-                }
-            } else {
-                _logger = spd::syslog_logger_mt(logger_name, ident, syslog_option, syslog_facilty);
-            }
-        } else {
-            if (async_mode) {
-                if (g_async_overflow_policy == spdlog::async_overflow_policy::overrun_oldest) {
-                    _logger = spd::syslog_logger_st<async_factory_nb>(
-                        logger_name,
-                        ident,
-                        syslog_option,
-                        syslog_facilty
-                    );
-                } else {
-                    _logger = spd::syslog_logger_st<spdlog::async_factory>(
-                        logger_name,
-                        ident,
-                        syslog_option,
-                        syslog_facilty
-                    );
-                }
-            } else {
-                _logger = spd::syslog_logger_st(logger_name, ident, syslog_option, syslog_facilty);
-            }
-        }
-    }
-};
-#endif
 
 class AsyncOverflowPolicy {
 public:
-    const static int block { (int)spd::async_overflow_policy::block };
-    const static int overrun_oldest { (int)spd::async_overflow_policy::overrun_oldest };
+    const static int block { (int)spdlog::async_overflow_policy::block };
+    const static int overrun_oldest { (int)spdlog::async_overflow_policy::overrun_oldest };
 };
 
 void set_async_mode(
@@ -758,10 +668,10 @@ void set_async_mode(
     // Initialize/replace the global spdlog thread pool.
     auto& registry = spdlog::details::registry::instance();
     std::lock_guard<std::recursive_mutex> tp_lck(registry.tp_mutex());
-    auto tp = std::make_shared<spd::details::thread_pool>(queue_size, thread_count);
+    auto tp = std::make_shared<spdlog::details::thread_pool>(queue_size, thread_count);
     registry.set_tp(tp);
 
-    g_async_overflow_policy = static_cast<spd::async_overflow_policy>(async_overflow_policy);
+    g_async_overflow_policy = static_cast<spdlog::async_overflow_policy>(async_overflow_policy);
     g_async_mode_on = true;
 }
 
@@ -782,14 +692,14 @@ public:
     SinkLogger(const std::string& logger_name, const Sink& sink, bool async_mode = g_async_mode_on):
         Logger(logger_name, async_mode) {
         if (async_mode) {
-            _logger = std::make_shared<spd::async_logger>(
+            _logger = std::make_shared<spdlog::async_logger>(
                 logger_name,
                 sink.get_sink(),
                 thread_pool(),
                 g_async_overflow_policy
             );
         } else {
-            _logger = std::make_shared<spd::logger>(logger_name, sink.get_sink());
+            _logger = std::make_shared<spdlog::logger>(logger_name, sink.get_sink());
         }
     }
     SinkLogger(
@@ -798,13 +708,13 @@ public:
         bool async_mode = g_async_mode_on
     ):
         Logger(logger_name, async_mode) {
-        std::vector<spd::sink_ptr> sinks;
+        std::vector<spdlog::sink_ptr> sinks;
         for (auto sink: sink_list) {
             sinks.push_back(sink.get_sink());
         }
 
         if (async_mode) {
-            _logger = std::make_shared<spd::async_logger>(
+            _logger = std::make_shared<spdlog::async_logger>(
                 logger_name,
                 sinks.begin(),
                 sinks.end(),
@@ -812,7 +722,7 @@ public:
                 g_async_overflow_policy
             );
         } else {
-            _logger = std::make_shared<spd::logger>(logger_name, sinks.begin(), sinks.end());
+            _logger = std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
         }
     }
 };
