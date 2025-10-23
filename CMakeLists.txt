@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # 把lua头文件添加到全局搜索路径
 include_directories(skynet/3rd/lua/
-                    lualib-src/common/)
+                    3rd/pluto/)
 
 # Windows
 if (CMAKE_SYSTEM_NAME MATCHES "Windows")
