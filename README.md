@@ -36,9 +36,7 @@ git clone --recurse-submodules git@github.com:cloudfreexiao/pluto.git
 
 ## 参考
 
-- [skynet-cmake](https://github.com/hanxi/skynet-cmake)
 - [moon](https://github.com/sniper00/moon)
-- [wiki](https://deepwiki.com/cloudfreexiao/pluto)
 
 ## 工具
 

@@ -1,4 +1,5 @@
 -- https://github.com/uzkbwza/signal.lua
+local skynet = require("skynet")
 
 ---@class Signal
 ---@field emitters table<table, table<string|number, {listeners: table<table, table<string|number, {func: function, oneshot: boolean}>>}>>
@@ -171,13 +172,27 @@ end
 ---@param emitter table
 ---@param signal_id string | number
 ---@param ... any
+function signal.async_emit(emitter, signal_id, ...)
+    skynet.fork(signal.emit, signal, emitter, signal_id, ...)
+end
+
+---@param emitter table
+---@param signal_id string | number
+---@param ... any
 function signal.emit(emitter, signal_id, ...)
     local sig = signal.get(emitter, signal_id)
-    if sig == nil then error("no signal " .. tostring(signal_id) .. " for emitter " .. tostring(emitter)) end
+    if sig == nil then
+        error("no signal " .. tostring(signal_id) .. " for emitter " .. tostring(emitter))
+    end
+
     for listener, connection in pairs(sig.listeners) do
         for func_name, t in pairs(connection) do
-            local func = t.func
-            func(...)
+            local ok = xpcall(t.func, skynet.error, ...)
+            if not ok then
+                --TODO: log error
+                -- error("no signal " .. tostring(signal_id) .. " for emitter " .. tostring(emitter))
+            end
+
             if t.oneshot then
                 signal.disconnect(emitter, signal_id, listener, func_name)
             end
