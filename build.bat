@@ -4,7 +4,7 @@ SET PATH=%PATH%;C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\L
 SET PATH=%PATH%;C:\Program Files\Microsoft Visual Studio\18\Community\VC\vcpkg\
 SET PATH=%PATH%;C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\
 
-rem Building on clang in windows
+rem building on clang in windows
 rmdir /s /q build
 mkdir build
 cd build
