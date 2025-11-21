@@ -185,12 +185,35 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     add_library(scram SHARED ${SCRAM_SRC})
     target_link_libraries(scram liblua)
 
+    set(LUASOCKET_DIR 3rd/luasocket/src)
+    set(LUASOCKET_SRC
+        ${LUASOCKET_DIR}/auxiliar.c
+        ${LUASOCKET_DIR}/buffer.c
+        ${LUASOCKET_DIR}/except.c
+        ${LUASOCKET_DIR}/inet.c
+        ${LUASOCKET_DIR}/io.c
+        ${LUASOCKET_DIR}/luasocket.c
+        ${LUASOCKET_DIR}/options.c
+        ${LUASOCKET_DIR}/select.c
+        ${LUASOCKET_DIR}/tcp.c
+        ${LUASOCKET_DIR}/timeout.c
+        ${LUASOCKET_DIR}/udp.c
+        ${LUASOCKET_DIR}/wsocket.c
+    )
+    add_library(socket SHARED ${LUASOCKET_SRC})
+    target_include_directories(socket PRIVATE ${LUASOCKET_DIR})
+    target_link_libraries(socket liblua ws2_32)
+
+    add_library(mime SHARED ${LUASOCKET_DIR}/mime.c)
+    target_include_directories(mime PRIVATE ${LUASOCKET_DIR})
+    target_link_libraries(mime liblua)
+
     # 设置动态库属性
     set_target_properties(
         lpeg sproto md5 bson skynetso 
         pb lfs fmt json buffer skiplist 
         aoi navmesh math3d clonefunc 
-        scram 
+        scram socket mime
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
@@ -377,11 +400,32 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     aux_source_directory(lualib-src/lua-syslog SYSLOG_SRC)
     add_library(syslog SHARED ${SYSLOG_SRC})
 
+    set(LUASOCKET_DIR 3rd/luasocket/src)
+    set(LUASOCKET_SRC
+        ${LUASOCKET_DIR}/auxiliar.c
+        ${LUASOCKET_DIR}/buffer.c
+        ${LUASOCKET_DIR}/except.c
+        ${LUASOCKET_DIR}/inet.c
+        ${LUASOCKET_DIR}/io.c
+        ${LUASOCKET_DIR}/luasocket.c
+        ${LUASOCKET_DIR}/options.c
+        ${LUASOCKET_DIR}/select.c
+        ${LUASOCKET_DIR}/tcp.c
+        ${LUASOCKET_DIR}/timeout.c
+        ${LUASOCKET_DIR}/udp.c
+        ${LUASOCKET_DIR}/usocket.c
+    )
+    add_library(socket SHARED ${LUASOCKET_SRC})
+    target_include_directories(socket PRIVATE ${LUASOCKET_DIR})
+
+    add_library(mime SHARED ${LUASOCKET_DIR}/mime.c)
+    target_include_directories(mime PRIVATE ${LUASOCKET_DIR})
+    
     set_target_properties(
         lpeg sproto client md5 bson 
         pb lfs fmt json buffer skiplist 
         aoi navmesh math3d clonefunc 
-        scram syslog 
+        scram syslog socket mime
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
@@ -567,11 +611,32 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     aux_source_directory(lualib-src/lua-syslog SYSLOG_SRC)
     add_library(syslog SHARED ${SYSLOG_SRC})
 
+    set(LUASOCKET_DIR 3rd/luasocket/src)
+    set(LUASOCKET_SRC
+        ${LUASOCKET_DIR}/auxiliar.c
+        ${LUASOCKET_DIR}/buffer.c
+        ${LUASOCKET_DIR}/except.c
+        ${LUASOCKET_DIR}/inet.c
+        ${LUASOCKET_DIR}/io.c
+        ${LUASOCKET_DIR}/luasocket.c
+        ${LUASOCKET_DIR}/options.c
+        ${LUASOCKET_DIR}/select.c
+        ${LUASOCKET_DIR}/tcp.c
+        ${LUASOCKET_DIR}/timeout.c
+        ${LUASOCKET_DIR}/udp.c
+        ${LUASOCKET_DIR}/usocket.c
+    )
+    add_library(socket SHARED ${LUASOCKET_SRC})
+    target_include_directories(socket PRIVATE ${LUASOCKET_DIR})
+
+    add_library(mime SHARED ${LUASOCKET_DIR}/mime.c)
+    target_include_directories(mime PRIVATE ${LUASOCKET_DIR})
+
     set_target_properties(
         lpeg sproto client md5 bson 
         pb lfs fmt json buffer skiplist 
         aoi navmesh math3d clonefunc 
-        scram 
+        scram syslog socket mime
         PROPERTIES
         PREFIX ""
         SUFFIX .so )

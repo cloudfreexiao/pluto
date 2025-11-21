@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+    "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+
+<head>
+<meta name="description" content="LuaSocket: Introduction to the core">
+<meta name="keywords" content="Lua, LuaSocket, TCP, UDP, Network, Support,
+Installation">
+<title>LuaSocket: Installation</title>
+<link rel="stylesheet" href="reference.css" type="text/css">
+</head>
+
+<body>
+
+<!-- header +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<div class=header>
+<hr>
+<center>
+<table summary="LuaSocket logo">
+<tr><td align=center><a href="http://www.lua.org">
+<img width=128 height=128 border=0 alt="LuaSocket" src="luasocket.png">
+</a></td></tr>
+<tr><td align=center valign=top>Network support for the Lua language
+</td></tr>
+</table>
+<p class=bar>
+<a href="index.html">home</a> &middot;
+<a href="index.html#download">download</a> &middot;
+<a href="installation.html">installation</a> &middot;
+<a href="introduction.html">introduction</a> &middot;
+<a href="reference.html">reference</a>
+</p>
+</center>
+<hr>
+</div>
+
+<!-- installation ++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<h2>Installation via luarocks</h2>
+
+
+
+<p>LuaSocket can be easily installed using <a href="https://luarocks.org/" target="_blank">LuaRocks</a>, the Lua package manager.</p>
+
+<h3>Installing via LuaRocks</h3>
+
+<p>Run the following command in your terminal:</p>
+<pre class=example>
+luarocks install luasocket
+</pre>
+
+<h3>Verification</h3>
+    <p>To verify that LuaSocket is installed correctly, open Lua and run:</p>
+    <pre class=example><code>
+   local socket = require("socket")
+   print(socket._VERSION)
+    </code></pre>
+
+<p>If you see output like <strong>LuaSocket 3.0</strong>, the installation was successful.</p>
+
+<h3>More Information</h3>
+<p>For more details, visit the <a href="https://github.com/lunarmodules/luasocket" target="_blank">LuaSocket GitHub repository</a>.</p>
+
+<!-- footer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<div class=footer>
+<hr>
+<center>
+<p class=bar>
+<a href="index.html">home</a> &middot;
+<a href="index.html#down">download</a> &middot;
+<a href="installation.html">installation</a> &middot;
+<a href="introduction.html">introduction</a> &middot;
+<a href="reference.html">reference</a>
+</p>
+<p>
+<small>
+Last modified by Diego Nehab on <br>
+Tue Jun 11 19:06:14 HKT 2013
+</small>
+</p>
+</center>
+</div>
+
+</body>
+</html>
