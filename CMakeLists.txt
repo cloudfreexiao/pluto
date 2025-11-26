@@ -29,8 +29,8 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     message(STATUS "The value of CMAKE_BINARY_DIR is: ${CMAKE_BINARY_DIR}")
 
     # 把lua头文件添加到全局搜索路径
-    include_directories(skynet/3rd/compat-mingw 3rd/pthread-win32 skynet/skynet-src)
-    add_compile_options(/FI ${CMAKE_SOURCE_DIR}/skynet/3rd/compat-mingw/unistd.h)
+    include_directories(3rd/posix 3rd/pthread-win32 skynet/skynet-src)
+    add_compile_options(/FI ${CMAKE_SOURCE_DIR}/3rd/posix/unistd.h)
 
     aux_source_directory(skynet/3rd/lua LUA_LIB_SRC)
     list(REMOVE_ITEM LUA_LIB_SRC 
@@ -52,7 +52,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
 
     aux_source_directory(skynet/skynet-src LIB_SKYNET_SRC)
     list(REMOVE_ITEM LIB_SKYNET_SRC skynet/skynet-src/skynet_main.c)
-    aux_source_directory(skynet/3rd/compat-mingw POSIX_SRC)
+    aux_source_directory(3rd/posix POSIX_SRC)
     add_subdirectory(3rd/pthread-win32)
     add_library(liblua SHARED ${LUA_LIB_SRC})
     add_library(libposix SHARED ${POSIX_SRC})
