@@ -1,0 +1,138 @@
+probe begin {
+    warn(sprintf("Tracing %d (%s) for standard Lua 5.3...\n", target(), @1))
+}
+
+global quit = 0;
+global stack_trace;
+
+function getfuncline: long (proto_ptr: long, pc: long) {
+    proto = &@cast(proto_ptr, "Proto", @1)
+    lineinfo = proto->lineinfo
+    
+    basepc = 0
+    baseline = 0
+    MAXIWTHABS = 128
+    lineno = -1
+    if(lineinfo != 0){
+        sizeabslineinfo = proto->sizeabslineinfo
+        if (sizeabslineinfo == 0 ) {
+            basepc = -1;  /* start from the beginning */
+            baseline = proto->linedefined;
+        }
+        else {
+            abslineinfo = proto->abslineinfo
+            abslineinfo_0 = &(abslineinfo)[0]
+
+            if(pc < abslineinfo_0->pc){
+                basepc = -1;  /* start from the beginning */
+                baseline = proto->linedefined;
+            }
+            else {
+                i = @cast(pc,"unsigned int") / MAXIWTHABS - 1;  /* get an estimate */
+                while (i + 1 < proto->sizeabslineinfo){
+                    abslineinfo_1 = &(abslineinfo)[i+1]
+                    if(pc < abslineinfo_1->pc){
+                        break;
+                    }
+                    i=i+1;  /* low estimate; adjust it */
+                }
+                abslineinfo_i = &(abslineinfo)[i]
+                basepc = abslineinfo_i->pc
+                baseline = abslineinfo_i->line;
+            }
+        }
+        while (basepc++ < pc) {  /* walk until given instruction */
+            baseline = baseline + (lineinfo)[basepc]  /* correct line */
+        }
+        lineno = baseline;
+    }
+    return lineno
+}
+
+probe process(@1).function("luaL_*"),
+    process(@1).function("lua_*")
+{
+    if (@defined($L) && !quit) {
+        L = $L
+        p = L->ci
+        stack = ""
+
+        idx = 1
+        tv = &(p->func->p)->val
+        value_ = &tv->value_
+        if ((tv->tt_) == (6 | (1 << 4))) { // LUA_TLCF, ignore light c function
+            next
+        }
+        else {
+            gc = value_->gc
+            closure = &@cast(gc, "GCUnion", @1)->cl
+            func = &@cast(closure, "Closure", @1)->c //CClosure
+            if (idx <= func->nupvalues) {
+                upvalue_type = func->upvalue[idx - 1]->tt_
+                if (upvalue_type != 2) { // light userdata
+                    next
+                } /* only this one can enter counter */
+                skynet_context = &@cast(func->upvalue[idx - 1]->value_->p, "skynet_context", @1)
+                /* service id in decimal*/
+                if (skynet_context->handle != strtol(@2, 10)) {
+                    next
+                }
+            } else {
+                next
+            }
+        }
+
+        while (p != 0 && !quit) {
+            tv = &(p->func->p)->val
+            value_ = &tv->value_
+            tt = tv->tt_ & 0x3f
+            if ( tt == 0x06 ) {
+                gc = value_->gc
+                closure = &@cast(gc, "GCUnion", @1)->cl
+                lua_closure = &closure->l
+                proto = lua_closure->p
+                source = proto->source
+                line_index = p->u->l->savedpc - proto->code
+                filename = user_string(source->contents)
+                pc = line_index/4 - 1
+                lineno = getfuncline(proto, pc)
+                frame = sprintf("%s:%d", filename, lineno)
+            }
+            else if ( tt == 0x16 ) {
+                f = value_->f
+                frame = "light_c_function:" . usymname(f)
+            }
+            else if ( tt == 0x26 ) {
+                gc = value_->gc
+                f = &@cast(gc, "GCUnion", @1)->cl->c->f
+                frame = "c_function:" . usymname(f)
+            }
+            else
+                frame = "nil"
+
+            p = p->previous
+            if (frame != "nil") {
+                if (stack == "") {
+                    stack = frame
+                }
+                else {
+                    stack = frame . ";" . stack
+                }
+            }
+        }
+        if (stack != "") {
+            stack_trace[stack]++
+        }
+    }
+}
+
+probe timer.s($3) {
+    warn("Quiting now\\n")
+    quit = 1;
+    exit()
+}
+
+probe end{
+    foreach (stack+ in stack_trace)
+        printf("%s %8d\n", stack, stack_trace[stack])
+}
