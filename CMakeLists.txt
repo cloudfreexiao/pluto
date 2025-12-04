@@ -171,7 +171,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     # 生成动态库 math3d.so
     aux_source_directory(lualib-src/math3d MATH3D_SRC)
     add_library(math3d SHARED ${MATH3D_SRC})
-    target_include_directories(math3d PRIVATE 3rd/glm/include/)
+    target_include_directories(math3d PRIVATE 3rd/glm/)
     target_compile_definitions(math3d PUBLIC -DGLM_ENABLE_EXPERIMENTAL -DGLM_FORCE_QUAT_DATA_XYZW)
     target_link_libraries(math3d liblua)
 
@@ -384,7 +384,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     # 生成动态库 math3d.so
     aux_source_directory(lualib-src/math3d MATH3D_SRC)
     add_library(math3d SHARED ${MATH3D_SRC})
-    target_include_directories(math3d PRIVATE 3rd/glm/include/)
+    target_include_directories(math3d PRIVATE 3rd/glm/)
     target_compile_definitions(math3d PUBLIC -DGLM_ENABLE_EXPERIMENTAL -DGLM_FORCE_QUAT_DATA_XYZW)
 
     # 生成动态库 clonefunc.so
@@ -595,7 +595,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     # 生成动态库 math3d.so
     aux_source_directory(lualib-src/math3d MATH3D_SRC)
     add_library(math3d SHARED ${MATH3D_SRC})
-    target_include_directories(math3d PRIVATE 3rd/glm/include/)
+    target_include_directories(math3d PRIVATE 3rd/glm/)
     target_compile_definitions(math3d PRIVATE -DGLM_ENABLE_EXPERIMENTAL -DGLM_FORCE_QUAT_DATA_XYZW)
 
     # 生成动态库 clonefunc.so
