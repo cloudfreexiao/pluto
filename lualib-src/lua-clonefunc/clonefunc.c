@@ -5,6 +5,7 @@
 #include <lobject.h>
 #include <lfunc.h>
 #include <lgc.h>
+#include <lapi.h>
 
 static int
 lclone(lua_State *L) {
