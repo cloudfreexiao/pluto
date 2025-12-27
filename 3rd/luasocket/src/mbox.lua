@@ -1,9 +1,5 @@
 local _M = {}
 
-if module then
-    mbox = _M   -- luacheck: ignore
-end
-
 function _M.split_message(message_s)
     local message = {}
     message_s = string.gsub(message_s, "\r\n", "\n")

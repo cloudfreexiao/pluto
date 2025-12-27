@@ -9,14 +9,12 @@
 -----------------------------------------------------------------------------
 local string = require("string")
 local table = require("table")
-local unpack = unpack or table.unpack
+local unpack = table.unpack
 local base = _G
 local select = select
 
 local _M = {}
-if module then -- heuristic for exporting a global package table
-    ltn12 = _M  -- luacheck: ignore
-end
+
 local filter,source,sink,pump = {},{},{},{}
 
 _M.filter = filter
