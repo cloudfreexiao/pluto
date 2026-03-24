@@ -6,11 +6,13 @@
     "configurations": [
         {
             "name": "skynet",
-            "type": "cppdbg",
+            "type": "lldb",
             "request": "launch",
             "program": "${command:cmake.launchTargetPath}",
             "cwd": "${workspaceFolder}/build/pluto",
-            "args": ["examples/config"],
+            "args": [
+                "examples/config"
+            ],
             "stopAtEntry": false,
             "environment": [],
             "externalConsole": false,
