@@ -185,6 +185,10 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     add_library(scram SHARED ${SCRAM_SRC})
     target_link_libraries(scram liblua)
 
+    aux_source_directory(lualib-src/lua-snapshot SNAPSHOT_SRC)
+    add_library(snapshot SHARED ${SNAPSHOT_SRC})
+    target_link_libraries(snapshot liblua)
+
     set(LUASOCKET_DIR 3rd/luasocket/src)
     set(LUASOCKET_SRC
         ${LUASOCKET_DIR}/auxiliar.c
@@ -213,7 +217,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
         lpeg sproto md5 bson skynetso 
         pb lfs fmt json buffer skiplist 
         aoi navmesh math3d clonefunc 
-        scram socket mime
+        scram socket mime snapshot
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
@@ -400,6 +404,11 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     aux_source_directory(lualib-src/lua-syslog SYSLOG_SRC)
     add_library(syslog SHARED ${SYSLOG_SRC})
 
+    # 生成动态库 snapshot.so
+    aux_source_directory(lualib-src/lua-snapshot SNAPSHOT_SRC)
+    add_library(snapshot SHARED ${SNAPSHOT_SRC})
+
+
     set(LUASOCKET_DIR 3rd/luasocket/src)
     set(LUASOCKET_SRC
         ${LUASOCKET_DIR}/auxiliar.c
@@ -425,7 +434,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
         lpeg sproto client md5 bson 
         pb lfs fmt json buffer skiplist 
         aoi navmesh math3d clonefunc 
-        scram syslog socket mime
+        scram syslog socket mime snapshot
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
@@ -611,6 +620,10 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     aux_source_directory(lualib-src/lua-syslog SYSLOG_SRC)
     add_library(syslog SHARED ${SYSLOG_SRC})
 
+    # 生成动态库 snapshot.so
+    aux_source_directory(lualib-src/lua-snapshot SNAPSHOT_SRC)
+    add_library(snapshot SHARED ${SNAPSHOT_SRC})
+
     set(LUASOCKET_DIR 3rd/luasocket/src)
     set(LUASOCKET_SRC
         ${LUASOCKET_DIR}/auxiliar.c
@@ -636,7 +649,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
         lpeg sproto client md5 bson 
         pb lfs fmt json buffer skiplist 
         aoi navmesh math3d clonefunc 
-        scram syslog socket mime
+        scram syslog socket mime snapshot
         PROPERTIES
         PREFIX ""
         SUFFIX .so )
