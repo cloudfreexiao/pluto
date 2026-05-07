@@ -185,6 +185,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     add_library(scram SHARED ${SCRAM_SRC})
     target_link_libraries(scram liblua)
 
+    # 生成动态库 snapshot.so
     aux_source_directory(lualib-src/lua-snapshot SNAPSHOT_SRC)
     add_library(snapshot SHARED ${SNAPSHOT_SRC})
     target_link_libraries(snapshot liblua)
