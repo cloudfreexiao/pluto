@@ -14,12 +14,13 @@
     #define POSIX_API __declspec(dllimport)
 #endif
 
-#define ssize_t size_t
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
 
 #define random rand
 #define srandom srand
 #define snprintf _snprintf
-#define localtime_r _localtime64_s
+#define localtime_r(timer, result) _localtime64_s(result, timer)
 
 #define pid_t int
 
