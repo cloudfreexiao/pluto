@@ -248,7 +248,7 @@ endif ()
 # Linux
 if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     message(STATUS "current platform: Linux")
-    add_compile_definitions(NOUSE_JEMALLOC LUA_USE_LINUX LUA_USE_READLINE)
+    add_compile_definitions(NOUSE_JEMALLOC LUA_USE_LINUX)
 
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -Wall ")
     set(CMAKE_SHARED_LINKER_FLAGS " -fPIC --shared -Wl,-E")
@@ -465,7 +465,7 @@ endif ()
 # MacOS
 if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     message(STATUS "current platform: Mac OS X")
-    add_compile_definitions(NOUSE_JEMALLOC LUA_USE_MACOSX LUA_USE_READLINE)
+    add_compile_definitions(NOUSE_JEMALLOC LUA_USE_MACOSX)
 
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -Wall ")
     set(CMAKE_SHARED_LINKER_FLAGS " -fPIC -dynamiclib -Wl,-undefined,dynamic_lookup")
