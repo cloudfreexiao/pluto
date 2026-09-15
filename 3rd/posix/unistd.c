@@ -160,7 +160,7 @@ int pipe(int fd[2]) {
     }
 
     struct sockaddr_in client_addr;
-    size_t name_len = sizeof(client_addr);
+    int name_len = sizeof(client_addr);
     int client_sock =
         accept(listen_fd, (struct sockaddr*)&client_addr, &name_len);
     // FD_SET( clientSock, &g_fdClientSock);
